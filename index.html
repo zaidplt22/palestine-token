@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palestine Token</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: Arial; text-align: center; direction: rtl; }
+        .card { background: #2c2c2c; margin: 20px; padding: 20px; border-radius: 15px; border-bottom: 5px solid #007a3d; }
+        .btn { background: #ee2d35; color: white; padding: 15px; border: none; border-radius: 10px; width: 80%; font-size: 18px; cursor: pointer; }
+        .points { font-size: 24px; color: #007a3d; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🇵🇸 Palestine Token</h1>
+    <div class="card">
+        <p>رصيدك الحالي:</p>
+        <div class="points" id="balance">0 PT</div>
+    </div>
+    
+    <div class="card">
+        <h3>🧩 لغز اليوم</h3>
+        <p id="puzzle">ما هو الشيء الذي ينبض بلا قلب؟</p>
+        <button class="btn" onclick="checkPuzzle()">حل اللغز</button>
+    </div>
+
+    <div class="card">
+        <h3>💰 الربح من الإعلانات</h3>
+        <p>شاهد إعلان لمدة 15 دقيقة لتربح 50 نقطة</p>
+        <button class="btn" style="background:#007a3d" onclick="watchAds()">بدأ المشاهدة</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // لفتح التطبيق بكامل الشاشة
+
+        function watchAds() {
+            // هنا تضع رابط موقع الإعلانات الخاص بك (مثل Adsterra)
+            window.open("https://www.google.com", "_blank"); 
+            alert("بدأ العداد.. لا تغلق الصفحة للحصول على النقاط");
+        }
+
+        function checkPuzzle() {
+            let ans = prompt("أدخل الإجابة:");
+            if(ans == "الساعة") {
+                alert("مبروك! ربحت 10 نقاط");
+            }
+        }
+    </script>
+</body>
+</html>
