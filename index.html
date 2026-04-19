@@ -3,65 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palestine Token2 Game</title>
-    <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
+    <title>Palestine Token2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
     <style>
-        body { background: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
-        .game-header { background: #1a1a1a; padding: 20px; border-bottom: 3px solid #007a3d; }
-        .balance-box { font-size: 28px; color: #007a3d; font-weight: bold; }
-        .cafe-container { margin: 20px; padding: 20px; background: #161616; border-radius: 15px; border: 1px solid #333; }
-        .energy-bar { background: #333; height: 10px; border-radius: 5px; margin: 10px auto; width: 80%; }
-        .energy-fill { background: #ee2d35; height: 100%; width: 100%; border-radius: 5px; }
-        .btn-action { background: #007a3d; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; width: 90%; margin-top: 10px; }
-        .ad-task { border: 1px dashed #ee2d35; padding: 10px; margin-top: 15px; border-radius: 10px; }
+        :root { --primary: #007a3d; --secondary: #ee2d35; --bg: #0a0a0a; --card: #151515; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; padding: 15px; text-align: center; user-select: none; }
+        .balance-card { background: linear-gradient(145deg, #111, #1a1a1a); border-radius: 20px; padding: 25px; margin-bottom: 20px; border-bottom: 4px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        #balance { font-size: 38px; font-weight: 900; color: var(--primary); margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .item-card { background: var(--card); border-radius: 18px; padding: 20px; border: 1px solid #222; position: relative; overflow: hidden; }
+        .btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px; }
+        .btn-puzzle { background: var(--secondary); }
+        .btn:active { transform: scale(0.95); }
+        .stats { font-size: 13px; color: #888; margin-bottom: 5px; }
+        #energy-bar { background: #222; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        #energy-fill { background: var(--secondary); height: 100%; width: 100%; transition: 0.5s; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
     </style>
 </head>
 <body>
 
-    <div class="game-header">
-        <div>رصيد $PT2</div>
-        <div id="balance" class="balance-box">0.00</div>
+    <div class="balance-card">
+        <div class="stats">رصيد $PT2</div>
+        <div id="balance">0.00</div>
+        <div class="stats">الأرباح التلقائية: 0.0001 / ساعة</div>
     </div>
 
-    <div class="cafe-container">
-        <h3>🏪 كافتيريا الشاي (Tea Tycoon)</h3>
-        <p>الأرباح التلقائية: <span style="color:#888;">0.0001 / ساعة</span></p>
-        <button class="btn-action" onclick="upgrade()">ترقية المعدات (قريباً)</button>
+    <div class="grid">
+        <div class="item-card">
+            <div style="font-size: 18px; font-weight: bold;">🏪 كافتيريا الشاي (Tea Tycoon)</div>
+            <div class="stats">المستوى: 1</div>
+            <button class="btn" onclick="upgrade()">ترقية المتجر 🚀</button>
+        </div>
+
+        <div class="item-card">
+            <div style="display: flex; justify-content: space-between;">
+                <span>⚡ الطاقة: <span id="energy-val">100</span>/100</span>
+            </div>
+            <div id="energy-bar"><div id="energy-fill"></div></div>
+            <button class="btn btn-puzzle" onclick="startPuzzle()">لعب الألغاز (Puzzle) 🧩</button>
+        </div>
+
+        <div class="item-card" style="border-color: var(--secondary);">
+            <div style="font-size: 16px;">📺 مهمة إعلانية مميزة</div>
+            <div style="color: var(--primary); font-weight: bold; margin: 5px 0;">اربح +6.00 $PT2</div>
+            <button class="btn" style="background: #333;" onclick="watchAd()">بدء المهمة الآن 💰</button>
+        </div>
     </div>
 
-    <div class="cafe-container">
-        <h3>⚡ خزان الطاقة</h3>
-        <div class="energy-bar"><div class="energy-fill"></div></div>
-        <button class="btn-action" style="background:#ee2d35;" onclick="playPuzzle()">لعب الألغاز (Puzzle)</button>
-    </div>
-
-    <div class="ad-task">
-        <p>📺 شاهد إعلان (رابط مختصر)</p>
-        <small>اربح +6 $PT2</small><br>
-        <button class="btn-action" onclick="watchAd()" style="background:#444;">بدء المهمة</button>
+    <div id="loader" class="overlay">
+        <div style="border: 4px solid #f3f3f3; border-top: 4px solid var(--secondary); border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite;"></div>
+        <p>جاري التحقق من المهمة... <span id="timer">30</span>ث</p>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        let pts = 0;
 
-        function watchAd() {
-            // سيفتح البوب أندر تلقائياً بفضل السكريبت
-            window.open("https://your-short-link.com", "_blank"); 
-            alert("عند العودة، سيتم التحقق من المهمة وإضافة 6 عملات.");
-        }
+        // البيانات الأساسية (Logic)
+        let balance = 0.00;
+        let energy = 100;
+        const AD_LINK = "https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js";
 
-        function playPuzzle() {
-            alert("جاري تحميل محرك Match-3... استهلكت 10 طاقة.");
+        // تحديث الرصيد التلقائي (قليل جداً كما طلبت)
+        setInterval(() => {
+            balance += 0.00000003; 
+            updateUI();
+        }, 1000);
+
+        function updateUI() {
+            document.getElementById('balance').innerText = balance.toFixed(4);
+            document.getElementById('energy-val').innerText = energy;
+            document.getElementById('energy-fill').style.width = energy + "%";
         }
 
         function upgrade() {
-            tg.HapticFeedback.impactOccurred('medium');
-            alert("تحتاج إلى رصيد أعلى للترقية.");
+            tg.showConfirm("هل تريد ترقية الكافتيريا مقابل 50 $PT2؟", (ok) => {
+                if(ok) {
+                    if(balance >= 50) {
+                        balance -= 50;
+                        tg.showAlert("✅ تمت الترقية بنجاح!");
+                    } else {
+                        tg.showAlert("❌ رصيدك غير كافٍ للترقية حالياً.");
+                    }
+                }
+            });
+        }
+
+        function watchAd() {
+            window.open(AD_LINK, "_blank");
+            startTimer(30, 6);
+        }
+
+        function startPuzzle() {
+            if(energy >= 20) {
+                energy -= 20;
+                startTimer(15, 2); // ربح بسيط من اللعب
+            } else {
+                tg.showAlert("⚡ الطاقة منخفضة! انتظر الشحن التلقائي.");
+            }
+        }
+
+        function startTimer(seconds, reward) {
+            let timeLeft = seconds;
+            const overlay = document.getElementById('loader');
+            const timerText = document.getElementById('timer');
+            
+            overlay.style.display = "flex";
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(interval);
+                    overlay.style.display = "none";
+                    balance += reward;
+                    updateUI();
+                    tg.HapticFeedback.notificationOccurred('success');
+                    tg.showAlert(`✅ أحسنت! تمت إضافة ${reward} $PT2 لرصيدك.`);
+                }
+            }, 1000);
         }
     </script>
+    <style> @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
