@@ -3,109 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palestine Token App</title>
+    <title>Palestine Token2 Game</title>
+    <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #0c0c0c; color: #e0e0e0; font-family: sans-serif; text-align: center; margin: 0; padding: 15px; }
-        .container { max-width: 400px; margin: auto; }
-        .card { background: #161616; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #222; }
-        #balance { font-size: 35px; color: #007a3d; font-weight: bold; margin: 5px 0; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .task-card { background: #1f1f1f; padding: 10px; border-radius: 12px; font-size: 13px; border: 1px solid #333; }
-        .btn { background: #ee2d35; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
-        .reward { color: #007a3d; font-weight: bold; }
-        #timer { color: #ee2d35; font-size: 13px; margin-top: 10px; display: none; }
+        body { background: #0f0f0f; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
+        .game-header { background: #1a1a1a; padding: 20px; border-bottom: 3px solid #007a3d; }
+        .balance-box { font-size: 28px; color: #007a3d; font-weight: bold; }
+        .cafe-container { margin: 20px; padding: 20px; background: #161616; border-radius: 15px; border: 1px solid #333; }
+        .energy-bar { background: #333; height: 10px; border-radius: 5px; margin: 10px auto; width: 80%; }
+        .energy-fill { background: #ee2d35; height: 100%; width: 100%; border-radius: 5px; }
+        .btn-action { background: #007a3d; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; width: 90%; margin-top: 10px; }
+        .ad-task { border: 1px dashed #ee2d35; padding: 10px; margin-top: 15px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="card">
-            <div style="font-size: 12px; color: #888;">رصيدك الحالي</div>
-            <div id="balance">0.00 PT</div>
-            <button id="dailyBtn" class="btn" style="background:#007a3d;" onclick="dailyCheck()">✅ تسجيل حضور يومي (+4)</button>
-        </div>
-
-        <div class="grid">
-            <div class="task-card">
-                <span>📺 مشاهدة إعلان</span><br>
-                <span class="reward">+6 PT</span>
-                <button id="adBtn" class="btn" onclick="startTask('ad')">بدء</button>
-            </div>
-            <div class="task-card">
-                <span>🔗 روابط مختصرة</span><br>
-                <span class="reward">+10 PT</span>
-                <button id="linkBtn" class="btn" onclick="startTask('link')">تنفيذ</button>
-            </div>
-        </div>
-
-        <div class="card" style="margin-top:15px;">
-            <span>👥 نظام الإحالات</span><br>
-            <span class="reward">+5 PT لكل صديق</span>
-            <button class="btn" style="background:#444;" onclick="copyInvite()">نسخ رابط الدعوة</button>
-        </div>
-
-        <div id="timer">⏳ يرجى الانتظار <span id="sec">30</span> ثانية للتحقق من المهمة...</div>
+    <div class="game-header">
+        <div>رصيد $PT2</div>
+        <div id="balance" class="balance-box">0.00</div>
     </div>
 
-    <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
+    <div class="cafe-container">
+        <h3>🏪 كافتيريا الشاي (Tea Tycoon)</h3>
+        <p>الأرباح التلقائية: <span style="color:#888;">0.0001 / ساعة</span></p>
+        <button class="btn-action" onclick="upgrade()">ترقية المعدات (قريباً)</button>
+    </div>
+
+    <div class="cafe-container">
+        <h3>⚡ خزان الطاقة</h3>
+        <div class="energy-bar"><div class="energy-fill"></div></div>
+        <button class="btn-action" style="background:#ee2d35;" onclick="playPuzzle()">لعب الألغاز (Puzzle)</button>
+    </div>
+
+    <div class="ad-task">
+        <p>📺 شاهد إعلان (رابط مختصر)</p>
+        <small>اربح +6 $PT2</small><br>
+        <button class="btn-action" onclick="watchAd()" style="background:#444;">بدء المهمة</button>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
         
-        let points = 0;
-        // رابط الإعلان المباشر للاحتياط
-        const directAdLink = "https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js";
+        let pts = 0;
 
-        function startTask(type) {
-            // فتح الإعلان في نافذة جديدة
-            window.open(directAdLink, "_blank");
-            
-            let btn = type === 'ad' ? document.getElementById('adBtn') : document.getElementById('linkBtn');
-            let timerDiv = document.getElementById('timer');
-            let secSpan = document.getElementById('sec');
-            let timeLeft = 30;
-
-            btn.disabled = true;
-            timerDiv.style.display = "block";
-
-            let countdown = setInterval(() => {
-                timeLeft--;
-                secSpan.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    timerDiv.style.display = "none";
-                    btn.disabled = false;
-                    
-                    if(type === 'ad') addPoints(6);
-                    else addPoints(10);
-                    
-                    alert("✅ أحسنت! تمت إضافة المكافأة إلى رصيدك.");
-                }
-            }, 1000);
+        function watchAd() {
+            // سيفتح البوب أندر تلقائياً بفضل السكريبت
+            window.open("https://your-short-link.com", "_blank"); 
+            alert("عند العودة، سيتم التحقق من المهمة وإضافة 6 عملات.");
         }
 
-        function dailyCheck() {
-            addPoints(4);
-            let btn = document.getElementById('dailyBtn');
-            btn.disabled = true;
-            btn.innerText = "تم التسجيل بنجاح";
-            btn.style.background = "#333";
+        function playPuzzle() {
+            alert("جاري تحميل محرك Match-3... استهلكت 10 طاقة.");
         }
 
-        function addPoints(amount) {
-            points += amount;
-            document.getElementById('balance').innerText = points.toFixed(2) + " PT";
-        }
-
-        function copyInvite() {
-            let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "12345";
-            let inviteLink = "https://t.me/PalestinePLT2_bot?start=" + userId;
-            
-            // محاكاة النسخ
-            alert("رابط دعوتك هو:\n" + inviteLink + "\n\n(قم بنسخه ونشره لتربح 5 نقاط عن كل شخص)");
+        function upgrade() {
+            tg.HapticFeedback.impactOccurred('medium');
+            alert("تحتاج إلى رصيد أعلى للترقية.");
         }
     </script>
 </body>
