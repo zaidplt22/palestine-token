@@ -301,7 +301,7 @@
           
           <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-xl">📺</div>
+              <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-xl">馃摵</div>
               <div>
                 <p class="font-medium text-white">Watch Video Ad</p>
                 <p class="text-xs text-gray-400">Earn rewards</p>
@@ -315,7 +315,7 @@
 
           <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-xl">📽️</div>
+              <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-xl">馃摻锔�</div>
               <div>
                 <p class="font-medium text-white">Watch Another Ad</p>
                 <p class="text-xs text-gray-400">More earnings</p>
@@ -329,7 +329,7 @@
 
           <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xl">⚡</div>
+              <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xl">鈿�</div>
               <div>
                 <p class="font-medium text-white">Watch for Energy</p>
                 <p class="text-xs text-gray-400">Refill energy bar</p>
@@ -345,9 +345,9 @@
       </section>
 <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between mb-2">
   <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-lg bg-emerald/20 flex items-center justify-center text-xl">📺</div>
+    <div class="w-10 h-10 rounded-lg bg-emerald/20 flex items-center justify-center text-xl">馃摵</div>
     <div>
-      <p class="font-medium text-white text-sm">شاهد إعلان واربح</p>
+      <p class="font-medium text-white text-sm">卮丕賴丿 廿毓賱丕賳 賵丕乇亘丨</p>
       <p class="text-xs text-emerald-light">+5 $PT2</p>
     </div>
   </div>
@@ -545,6 +545,7 @@
 
   <script>
     // Game State
+const AdController = window.Adsgram.init({ blockId: "28189" });
     let balance = parseInt(localStorage.getItem('pt2_balance')) || 10;
     let energy = parseInt(localStorage.getItem('pt2_energy')) || 100;
     let score = parseInt(localStorage.getItem('pt2_score')) || 0;
@@ -847,7 +848,7 @@
     function completeTaskWithVerify(taskId, url, reward, type) {
     const storageKey = `pt2_${type}_${taskId}`;
     if (localStorage.getItem(storageKey) === 'true') {
-        showAlert('المهمة مكتملة بالفعل!');
+        showAlert('丕賱賲賴賲丞 賲賰鬲賲賱丞 亘丕賱賮毓賱!');
         return;
     }
 
@@ -857,7 +858,7 @@
     if (btn.innerText === 'Join' || btn.innerText === 'Follow' || btn.innerText === 'Subscribe') {
         window.open(url, '_blank');
         btn.innerText = 'Verify';
-        // تغيير اللون للأحمر لتنبيه المستخدم بضرورة التحقق
+        // 鬲睾賷賷乇 丕賱賱賵賳 賱賱兀丨賲乇 賱鬲賳亘賷賴 丕賱賲爻鬲禺丿賲 亘囟乇賵乇丞 丕賱鬲丨賯賯
         btn.style.background = 'linear-gradient(135deg, #ee2d35, #ff4d55)'; 
     } else {
         btn.innerText = 'Checking...';
@@ -868,7 +869,7 @@
             updateBalance(reward);
             markTaskComplete(taskId);
             if(type === 'mandatory') updateMandatoryProgress();
-            showAlert(`تم التحقق! حصلت على ${reward} $PT2`);
+            showAlert(`鬲賲 丕賱鬲丨賯賯! 丨氐賱鬲 毓賱賶 ${reward} $PT2`);
         }, 3000); 
     }
 }
@@ -891,10 +892,11 @@
 
     // Referral
     function initReferralLink() {
-      const oderId = localStorage.getItem('pt2_oderId') || Math.random().toString(36).substr(2, 8);
-      localStorage.setItem('pt2_oderId', oderId);
-      document.getElementById('referralLink').textContent = 'https://t.me/PT2Bot?start=ref_' + oderId;
-    }
+  const oderId = localStorage.getItem('pt2_oderId') || Math.random().toString(36).substr(2, 8);
+  localStorage.setItem('pt2_oderId', oderId);
+  // تم تعديل المعرف هنا ليكون خاصاً ببوتك
+  document.getElementById('referralLink').textContent = 'https://t.me/PalestinePLT2_bot?start=ref_' + oderId;
+}
 
     function shareReferral() {
       const link = document.getElementById('referralLink').textContent;
@@ -949,29 +951,27 @@
       // Update daily reward button every minute
       setInterval(updateDailyRewardButton, 60000);
     });
-// إضافة إعلانات Adsgram بمكافأة 5 عملات
-const AdController = window.Adsgram.init({ blockId: "28189" });
-// دالة الحصول على 5 عملات من الإعلان
+// 丿丕賱丞 丕賱丨氐賵賱 毓賱賶 5 毓賲賱丕鬲 賲賳 丕賱廿毓賱丕賳
 function showAdsgramReward() {
     AdController.show().then(() => {
-        updateBalance(5); // إضافة الرصيد
-        showAlert("مبروك! حصلت على 5 $PT2");
+        updateBalance(5); // 廿囟丕賮丞 丕賱乇氐賷丿
+        showAlert("賲亘乇賵賰! 丨氐賱鬲 毓賱賶 5 $PT2");
     }).catch(() => {
-        showAlert("يجب مشاهدة الإعلان كاملاً للحصول على المكافأة");
+        showAlert("賷噩亘 賲卮丕賴丿丞 丕賱廿毓賱丕賳 賰丕賲賱丕賸 賱賱丨氐賵賱 毓賱賶 丕賱賲賰丕賮兀丞");
     });
 }
 function watchAdForEnergy() {
     AdController.show().then(() => {
-        energy = Math.min(100, energy + 20); // زيادة الطاقة 20
+        energy = Math.min(100, energy + 20); // 夭賷丕丿丞 丕賱胤丕賯丞 20
         document.getElementById('energyValue').textContent = energy;
         document.getElementById('energyBar').style.width = energy + '%';
         saveState();
-        showAlert("تم شحن 20 طاقة بنجاح!");
+        showAlert("鬲賲 卮丨賳 20 胤丕賯丞 亘賳噩丕丨!");
     }).catch(() => {
-        showAlert("يجب مشاهدة الإعلان للحصول على الطاقة");
+        showAlert("賷噩亘 賲卮丕賴丿丞 丕賱廿毓賱丕賳 賱賱丨氐賵賱 毓賱賶 丕賱胤丕賯丞");
     });
 }
-// ربط دالة watchAd بنفس نظام المكافآت
+// 乇亘胤 丿丕賱丞 watchAd 亘賳賮爻 賳馗丕賲 丕賱賲賰丕賮丌鬲
 function watchAd() {
     showAdsgramReward();
 }
