@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Palestine Token2 Game | Play. Earn. Support.</title>
-  <meta name="description" content="A premium crypto-game Mini App featuring Match-3 puzzles, Tea Tycoon management, and daily rewards.">
+  <meta name="description" content="A premium crypto-game Mini App featuring Tile Match puzzles, Tea Tycoon management, and daily rewards.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -36,16 +36,20 @@
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(0, 122, 61, 0.4); } 50% { box-shadow: 0 0 40px rgba(0, 122, 61, 0.8), 0 0 60px rgba(0, 122, 61, 0.4); } }
     @keyframes energy-flow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
     @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-    @keyframes gem-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes tile-pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    @keyframes slide-in { 0% { transform: translateY(-20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes match-clear { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
     .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
     .animate-energy-flow { background-size: 200% 100%; animation: energy-flow 2s linear infinite; }
     .animate-float { animation: float 3s ease-in-out infinite; }
+    .animate-tile-pop { animation: tile-pop 0.3s ease-out; }
+    .animate-slide-in { animation: slide-in 0.3s ease-out; }
+    .animate-match-clear { animation: match-clear 0.3s ease-out forwards; }
     .energy-bar { background: linear-gradient(90deg, #007a3d, #00a854, #007a3d); background-size: 200% 100%; animation: energy-flow 2s linear infinite; }
     .energy-bar-container { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 122, 61, 0.3); }
-    .gem { transition: all 0.2s ease; cursor: pointer; }
-    .gem:hover { transform: scale(1.1); filter: brightness(1.2); }
-    .gem:active { transform: scale(0.95); }
-    .gem.selected { animation: gem-pulse 0.5s ease-in-out infinite; box-shadow: 0 0 20px currentColor; }
+    .tile { transition: all 0.2s ease; cursor: pointer; user-select: none; }
+    .tile:hover { transform: scale(1.05); filter: brightness(1.1); }
+    .tile:active { transform: scale(0.95); }
     .btn-primary { background: linear-gradient(135deg, #007a3d, #00a854); transition: all 0.3s ease; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 122, 61, 0.4); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
@@ -60,244 +64,240 @@
     .task-card { transition: all 0.3s ease; }
     .task-card:hover { transform: translateX(4px); border-color: rgba(0, 122, 61, 0.3); }
     .task-card.completed { opacity: 0.6; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .collection-slot { width: 44px; height: 44px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .collection-slot.filled { border: 2px solid rgba(0, 122, 61, 0.5); background: rgba(0, 122, 61, 0.1); }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #12121a; }
     ::-webkit-scrollbar-thumb { background: #007a3d; border-radius: 4px; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body class="bg-background text-white">
   <div class="ambient-bg"></div>
 
-  <!-- Main Container -->
   <div class="relative z-10 min-h-screen pb-24">
-    <!-- Header Dashboard -->
-    <header class="p-4">
-      <div class="glass rounded-2xl p-5 animate-pulse-glow">
-        <div class="flex items-center justify-between mb-4">
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page active">
+      <!-- Header Dashboard -->
+      <header class="p-4">
+        <div class="glass rounded-2xl p-5 animate-pulse-glow">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wider">$PT2 Balance</p>
+                <p class="text-3xl font-bold glow-text text-emerald-light" id="balance">10</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-gray-400">Today's Earnings</p>
+              <p class="text-lg font-semibold text-emerald-light" id="todayEarnings">+0 $PT2</p>
+            </div>
+          </div>
+          <button id="dailyRewardBtn" class="btn-ruby w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden" onclick="claimDailyReward()">
+            <span class="absolute top-2 right-2 w-2 h-2 bg-white rounded-full animate-ping" id="dailyPing"></span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+            </svg>
+            <span id="dailyBtnText">Claim Daily Reward (+5 $PT2)</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Energy System -->
+      <section class="px-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            Energy
+          </h2>
+          <span class="text-emerald-light font-semibold text-sm animate-pulse" id="energyStatus">Max Energy!</span>
+        </div>
+        <div class="glass-light rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl font-bold text-white" id="energyValue">100</span>
+            <span class="text-gray-400">/100</span>
+          </div>
+          <div class="energy-bar-container h-4 rounded-full bg-surface overflow-hidden">
+            <div class="energy-bar h-full rounded-full transition-all duration-500" id="energyBar" style="width: 100%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tile Match Game -->
+      <section class="px-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ruby" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Tile Match
+          </h2>
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center">
-              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 uppercase tracking-wider">$PT2 Balance</p>
-              <p class="text-3xl font-bold glow-text text-emerald-light" id="balance">10</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <p class="text-xs text-gray-400">Today's Earnings</p>
-            <p class="text-lg font-semibold text-emerald-light" id="todayEarnings">+0 $PT2</p>
+            <span class="text-xs text-gray-400">Score: <span class="text-emerald-light font-bold" id="score">0</span></span>
+            <span class="text-xs text-gray-400">Level: <span class="text-ruby-light font-bold" id="gameLevel">1</span></span>
           </div>
         </div>
-        <button id="dailyRewardBtn" class="btn-ruby w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden" onclick="claimDailyReward()">
-          <span class="absolute top-2 right-2 w-2 h-2 bg-white rounded-full animate-ping" id="dailyPing"></span>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
-          </svg>
-          <span id="dailyBtnText">Claim Daily Reward</span>
-        </button>
-      </div>
-    </header>
+        <div class="glass-light rounded-2xl p-4">
+          <!-- Game Board -->
+          <div class="grid grid-cols-6 gap-2 mb-4" id="gameBoard"></div>
+          
+          <!-- Collection Bar -->
+          <div class="bg-surface rounded-xl p-3">
+            <p class="text-xs text-gray-400 mb-2 text-center">Collection Bar (Match 3 to clear)</p>
+            <div class="flex justify-center gap-1" id="collectionBar">
+              <div class="collection-slot"></div>
+              <div class="collection-slot"></div>
+              <div class="collection-slot"></div>
+              <div class="collection-slot"></div>
+              <div class="collection-slot"></div>
+              <div class="collection-slot"></div>
+              <div class="collection-slot"></div>
+            </div>
+          </div>
+          
+          <!-- Game Controls -->
+          <div class="mt-4 flex items-center justify-between">
+            <button class="px-4 py-2 rounded-lg bg-surface-light text-sm font-medium text-gray-300 hover:text-white transition-colors" onclick="shuffleBoard()">
+              Shuffle (-10 Energy)
+            </button>
+            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="newGame()">
+              New Game
+            </button>
+          </div>
+        </div>
+      </section>
 
-    <!-- Tea Tycoon Section -->
-    <section class="px-4 mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <span class="text-2xl">&#129483;</span>
-          Tea Tycoon
+      <!-- Tea Tycoon Section -->
+      <section class="px-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <span class="text-2xl">&#129483;</span>
+            Tea Tycoon
+          </h2>
+          <span class="px-3 py-1 rounded-full bg-emerald/20 text-emerald-light text-xs font-semibold" id="shopLevel">Level 1</span>
+        </div>
+        <div class="glass-light rounded-2xl p-4">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-3xl animate-float">&#129483;</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-white mb-1">Bubble Tea Shop</h3>
+              <p class="text-sm text-gray-400">Profit/Hour: <span class="text-emerald-light font-semibold" id="profitHour">+1 $PT2</span></p>
+            </div>
+          </div>
+          <button class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2" onclick="upgradeShop()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            </svg>
+            <span>Upgrade Shop</span>
+            <span class="text-emerald-light/80 text-sm" id="upgradeCost">(50 $PT2)</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- TASKS PAGE -->
+    <div id="page-tasks" class="page">
+      <header class="p-4">
+        <h1 class="text-2xl font-bold text-center">Task Center</h1>
+        <p class="text-gray-400 text-center text-sm mt-1">Complete tasks to earn $PT2</p>
+      </header>
+
+      <!-- Mandatory Tasks -->
+      <section class="px-4 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ruby" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+            </svg>
+            Mandatory Tasks
+          </h2>
+          <span class="px-3 py-1 rounded-full bg-ruby/20 text-ruby-light text-xs font-semibold" id="mandatoryProgress">0/6</span>
+        </div>
+        <div class="glass-light rounded-2xl p-4">
+          <div class="space-y-2" id="mandatoryTasksList">
+            <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-okswap">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-xl">&#128176;</div>
+                <div>
+                  <p class="font-medium text-white text-sm">OKSwap Bot</p>
+                  <p class="text-xs text-emerald-light">+2 $PT2</p>
+                </div>
+              </div>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('okswap', 'https://t.me/OKSwap_robot?start=_tgr_q-1AYHdmYWQ0')">Join</button>
+            </div>
+            <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-spinstar">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xl">&#11088;</div>
+                <div>
+                  <p class="font-medium text-white text-sm">Spinstar Bot</p>
+                  <p class="text-xs text-emerald-light">+2 $PT2</p>
+                </div>
+              </div>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('spinstar', 'https://t.me/Spinstar22bot?start=_tgr_YbWIWNdjZGRk')">Join</button>
+            </div>
+            <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-buyvpn">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-xl">&#128274;</div>
+                <div>
+                  <p class="font-medium text-white text-sm">BuyVPN Global</p>
+                  <p class="text-xs text-emerald-light">+2 $PT2</p>
+                </div>
+              </div>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('buyvpn', 'https://t.me/BuyVPN_Global_bot?start=_tgr_CkJ7gcxhMDk0')">Join</button>
+            </div>
+            <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-payment">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-xl">&#128179;</div>
+                <div>
+                  <p class="font-medium text-white text-sm">Payment Bot</p>
+                  <p class="text-xs text-emerald-light">+2 $PT2</p>
+                </div>
+              </div>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('payment', 'https://t.me/payment235234_bot?start=_tgr_wMYQJA44NWQ0')">Join</button>
+            </div>
+            <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-staronelink">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center text-xl">&#127775;</div>
+                <div>
+                  <p class="font-medium text-white text-sm">Star OneLink</p>
+                  <p class="text-xs text-emerald-light">+2 $PT2</p>
+                </div>
+              </div>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('staronelink', 'https://t.me/star_onelink_bot?start=_tgr_oFa1x4c3NTc0')">Join</button>
+            </div>
+            <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-channel">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald/20 flex items-center justify-center text-xl">&#127477;&#127480;</div>
+                <div>
+                  <p class="font-medium text-white text-sm">Official Channel</p>
+                  <p class="text-xs text-emerald-light">+2 $PT2</p>
+                </div>
+              </div>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('channel', 'https://t.me/PalestineToken2')">Join</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ad Tasks -->
+      <section class="px-4 mb-6">
+        <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Ad Tasks
         </h2>
-        <span class="px-3 py-1 rounded-full bg-emerald/20 text-emerald-light text-xs font-semibold" id="shopLevel">Level 1</span>
-      </div>
-      <div class="glass-light rounded-2xl p-4">
-        <div class="flex items-center gap-4 mb-4">
-          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-3xl animate-float">&#129483;</div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-white mb-1">Bubble Tea Shop</h3>
-            <div class="flex items-center gap-4 text-sm">
-              <div>
-                <span class="text-gray-400">Profit/Hour:</span>
-                <span class="text-emerald-light font-semibold ml-1" id="profitHour">+5 $PT2</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3 mb-4">
-          <div class="bg-surface rounded-xl p-3 text-center">
-            <p class="text-xs text-gray-400 mb-1">Total Earned</p>
-            <p class="text-lg font-bold text-white" id="totalEarned">0 $PT2</p>
-          </div>
-          <div class="bg-surface rounded-xl p-3 text-center">
-            <p class="text-xs text-gray-400 mb-1">Customers Today</p>
-            <p class="text-lg font-bold text-white" id="customers">0</p>
-          </div>
-        </div>
-        <button class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2" onclick="upgradeShop()">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-          </svg>
-          <span>Upgrade Shop</span>
-          <span class="text-emerald-light/80 text-sm" id="upgradeCost">(50 $PT2)</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Puzzle Game Board -->
-    <section class="px-4 mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <svg class="w-5 h-5 text-ruby" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
-          Puzzle Engine
-        </h2>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-gray-400">Score:</span>
-          <span class="text-emerald-light font-bold" id="score">0</span>
-        </div>
-      </div>
-      <div class="glass-light rounded-2xl p-4">
-        <div class="grid grid-cols-6 gap-2" id="gameBoard"></div>
-        <div class="mt-4 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-400">Moves:</span>
-            <span class="text-white font-semibold" id="moves">15</span>
-          </div>
-          <button class="px-4 py-2 rounded-lg bg-surface-light text-sm font-medium text-gray-300 hover:text-white transition-colors" onclick="shuffleBoard()">Shuffle</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Energy System -->
-    <section class="px-4 mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-          </svg>
-          Energy
-        </h2>
-        <span class="text-emerald-light font-semibold text-sm animate-pulse" id="energyStatus">Max Energy!</span>
-      </div>
-      <div class="glass-light rounded-2xl p-4">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-2xl font-bold text-white" id="energyValue">100</span>
-          <span class="text-gray-400">/100</span>
-        </div>
-        <div class="energy-bar-container h-4 rounded-full bg-surface overflow-hidden">
-          <div class="energy-bar h-full rounded-full transition-all duration-500" id="energyBar" style="width: 100%"></div>
-        </div>
-        <div class="mt-3 flex items-center justify-between text-sm">
-          <span class="text-gray-400">Refills in: <span class="text-white" id="refillTime">Full</span></span>
-          <button class="text-emerald-light font-medium hover:underline" onclick="watchAdForEnergy()">+20 Energy (Watch Ad)</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Mandatory Tasks Section -->
-    <section class="px-4 mb-6" id="mandatoryTasksSection">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <svg class="w-5 h-5 text-ruby" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-          </svg>
-          Mandatory Tasks
-        </h2>
-        <span class="px-3 py-1 rounded-full bg-ruby/20 text-ruby-light text-xs font-semibold" id="mandatoryProgress">0/6</span>
-      </div>
-      <div class="glass-light rounded-2xl p-4">
-        <p class="text-sm text-gray-400 mb-4">Join our partner bots and channels to earn bonus rewards!</p>
-        <div class="space-y-2" id="mandatoryTasksList">
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-okswap">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-              </div>
-              <div>
-                <p class="font-medium text-white text-sm">OKSwap Bot</p>
-                <p class="text-xs text-emerald-light">+5 $PT2</p>
-              </div>
-            </div>
-            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('okswap', 'https://t.me/OKSwap_robot?start=_tgr_q-1AYHdmYWQ0')">Join</button>
-          </div>
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-spinstar">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </div>
-              <div>
-                <p class="font-medium text-white text-sm">Spinstar Bot</p>
-                <p class="text-xs text-emerald-light">+5 $PT2</p>
-              </div>
-            </div>
-            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('spinstar', 'https://t.me/Spinstar22bot?start=_tgr_YbWIWNdjZGRk')">Join</button>
-          </div>
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-buyvpn">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-              </div>
-              <div>
-                <p class="font-medium text-white text-sm">BuyVPN Global</p>
-                <p class="text-xs text-emerald-light">+5 $PT2</p>
-              </div>
-            </div>
-            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('buyvpn', 'https://t.me/BuyVPN_Global_bot?start=_tgr_CkJ7gcxhMDk0')">Join</button>
-          </div>
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-payment">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-              </div>
-              <div>
-                <p class="font-medium text-white text-sm">Payment Bot</p>
-                <p class="text-xs text-emerald-light">+5 $PT2</p>
-              </div>
-            </div>
-            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('payment', 'https://t.me/payment235234_bot?start=_tgr_wMYQJA44NWQ0')">Join</button>
-          </div>
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-staronelink">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-pink-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </div>
-              <div>
-                <p class="font-medium text-white text-sm">Star OneLink</p>
-                <p class="text-xs text-emerald-light">+5 $PT2</p>
-              </div>
-            </div>
-            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('staronelink', 'https://t.me/star_onelink_bot?start=_tgr_oFa1x4c3NTc0')">Join</button>
-          </div>
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-channel">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-emerald/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-light" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-              </div>
-              <div>
-                <p class="font-medium text-white text-sm">Official Channel</p>
-                <p class="text-xs text-emerald-light">+5 $PT2</p>
-              </div>
-            </div>
-            <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeMandatoryTask('channel', 'https://t.me/PalestineToken2')">Join</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Task Center -->
-    <section class="px-4 mb-6">
-      <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
-        <svg class="w-5 h-5 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-        </svg>
-        Task Center
-      </h2>
-      <div class="mb-4">
-        <h3 class="text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Ad Tasks</h3>
-        <div class="space-y-2">
-          <div class="task-card glass-light rounded-xl p-3 flex items-center justify-between">
+        <div class="glass-light rounded-2xl p-4 space-y-2">
+          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
                 <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -308,14 +308,14 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-emerald-light font-semibold text-sm">+6 $PT2</span>
+              <span class="text-emerald-light font-semibold text-sm">+1 $PT2</span>
               <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAd()">Watch</button>
             </div>
           </div>
-          <div class="task-card glass-light rounded-xl p-3 flex items-center justify-between">
+          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               </div>
               <div>
                 <p class="font-medium text-white">Watch Another Ad</p>
@@ -323,54 +323,191 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-emerald-light font-semibold text-sm">+6 $PT2</span>
+              <span class="text-emerald-light font-semibold text-sm">+1 $PT2</span>
               <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAd()">Watch</button>
             </div>
           </div>
+          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <div>
+                <p class="font-medium text-white">Watch for Energy</p>
+                <p class="text-xs text-gray-400">+20 Energy bonus</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-light font-semibold text-sm">+1 $PT2</span>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAdForEnergy()">Watch</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div>
-        <h3 class="text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Social Tasks</h3>
-        <div class="space-y-2">
-          <div class="task-card glass-light rounded-xl p-3 flex items-center justify-between" id="task-twitter">
+      </section>
+
+      <!-- Social Tasks -->
+      <section class="px-4 mb-6">
+        <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Social Tasks
+        </h2>
+        <div class="glass-light rounded-2xl p-4 space-y-2">
+          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-twitter">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center">
                 <svg class="w-5 h-5 text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </div>
               <div>
-                <p class="font-medium text-white">Follow on X (Twitter)</p>
+                <p class="font-medium text-white">Follow on X</p>
                 <p class="text-xs text-gray-400">@PalestineToken2</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-emerald-light font-semibold text-sm">+10 $PT2</span>
+              <span class="text-emerald-light font-semibold text-sm">+2 $PT2</span>
               <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeSocialTask('twitter', 'https://twitter.com/PalestineToken2')">Follow</button>
             </div>
           </div>
-          <div class="task-card glass-light rounded-xl p-3 flex items-center justify-between" id="task-invite">
+          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between" id="task-youtube">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-emerald/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
               </div>
               <div>
-                <p class="font-medium text-white">Invite Friends</p>
-                <p class="text-xs text-gray-400">Share your referral link</p>
+                <p class="font-medium text-white">Subscribe YouTube</p>
+                <p class="text-xs text-gray-400">Watch and subscribe</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-emerald-light font-semibold text-sm">+10 $PT2</span>
-              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="shareReferral()">Invite</button>
+              <span class="text-emerald-light font-semibold text-sm">+2 $PT2</span>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="completeSocialTask('youtube', 'https://youtube.com/@PalestineToken2')">Subscribe</button>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
-    <!-- Ad Container -->
-    <div id="adContainer" class="px-4 mb-6 hidden">
-      <div class="glass-light rounded-2xl p-4 flex items-center justify-center min-h-[280px]">
-        <div id="adContent"></div>
-      </div>
+    <!-- REFERRAL PAGE -->
+    <div id="page-referral" class="page">
+      <header class="p-4">
+        <h1 class="text-2xl font-bold text-center">Referral Program</h1>
+        <p class="text-gray-400 text-center text-sm mt-1">Invite friends and earn together</p>
+      </header>
+
+      <section class="px-4 mb-6">
+        <div class="glass rounded-2xl p-6 text-center">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Earn 2 $PT2 per Referral</h3>
+          <p class="text-gray-400 text-sm mb-6">Share your unique link and earn when friends join</p>
+          <div class="bg-surface rounded-xl p-4 mb-4">
+            <p class="text-xs text-gray-400 mb-2">Your Referral Link</p>
+            <p class="text-emerald-light text-sm font-mono break-all" id="referralLink">https://t.me/PT2Bot?start=ref_xxxxx</p>
+          </div>
+          <button class="btn-primary w-full py-3 rounded-xl font-semibold text-white" onclick="shareReferral()">
+            Share Referral Link
+          </button>
+        </div>
+      </section>
+
+      <section class="px-4 mb-6">
+        <h2 class="text-lg font-bold mb-3">Your Stats</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="glass-light rounded-xl p-4 text-center">
+            <p class="text-2xl font-bold text-emerald-light" id="totalReferrals">0</p>
+            <p class="text-xs text-gray-400">Total Referrals</p>
+          </div>
+          <div class="glass-light rounded-xl p-4 text-center">
+            <p class="text-2xl font-bold text-ruby-light" id="referralEarnings">0 $PT2</p>
+            <p class="text-xs text-gray-400">Earnings</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- LEADERBOARD PAGE -->
+    <div id="page-leaderboard" class="page">
+      <header class="p-4">
+        <h1 class="text-2xl font-bold text-center">Leaderboard</h1>
+        <p class="text-gray-400 text-center text-sm mt-1">Top $PT2 earners</p>
+      </header>
+
+      <section class="px-4 mb-6">
+        <div class="glass rounded-2xl p-4">
+          <div class="space-y-2">
+            <div class="bg-gradient-to-r from-yellow-500/20 to-transparent rounded-xl p-3 flex items-center gap-3">
+              <span class="text-2xl">&#129351;</span>
+              <div class="w-10 h-10 rounded-full bg-yellow-500/30 flex items-center justify-center font-bold">1</div>
+              <div class="flex-1">
+                <p class="font-semibold">CryptoKing</p>
+                <p class="text-xs text-gray-400">Level 15</p>
+              </div>
+              <p class="text-emerald-light font-bold">45,230 $PT2</p>
+            </div>
+            <div class="bg-gradient-to-r from-gray-400/20 to-transparent rounded-xl p-3 flex items-center gap-3">
+              <span class="text-2xl">&#129352;</span>
+              <div class="w-10 h-10 rounded-full bg-gray-400/30 flex items-center justify-center font-bold">2</div>
+              <div class="flex-1">
+                <p class="font-semibold">TokenMaster</p>
+                <p class="text-xs text-gray-400">Level 12</p>
+              </div>
+              <p class="text-emerald-light font-bold">38,120 $PT2</p>
+            </div>
+            <div class="bg-gradient-to-r from-amber-600/20 to-transparent rounded-xl p-3 flex items-center gap-3">
+              <span class="text-2xl">&#129353;</span>
+              <div class="w-10 h-10 rounded-full bg-amber-600/30 flex items-center justify-center font-bold">3</div>
+              <div class="flex-1">
+                <p class="font-semibold">PT2Whale</p>
+                <p class="text-xs text-gray-400">Level 11</p>
+              </div>
+              <p class="text-emerald-light font-bold">32,450 $PT2</p>
+            </div>
+            <div class="bg-surface rounded-xl p-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-surface-light flex items-center justify-center font-bold text-gray-400">4</div>
+              <div class="flex-1">
+                <p class="font-semibold">GamePro</p>
+                <p class="text-xs text-gray-400">Level 9</p>
+              </div>
+              <p class="text-emerald-light font-bold">28,900 $PT2</p>
+            </div>
+            <div class="bg-surface rounded-xl p-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-surface-light flex items-center justify-center font-bold text-gray-400">5</div>
+              <div class="flex-1">
+                <p class="font-semibold">EarnMore</p>
+                <p class="text-xs text-gray-400">Level 8</p>
+              </div>
+              <p class="text-emerald-light font-bold">24,100 $PT2</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/10">
+            <div class="bg-emerald/20 rounded-xl p-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-emerald/30 flex items-center justify-center font-bold" id="yourRank">--</div>
+              <div class="flex-1">
+                <p class="font-semibold">You</p>
+                <p class="text-xs text-gray-400" id="yourLevel">Level 1</p>
+              </div>
+              <p class="text-emerald-light font-bold" id="yourBalance">10 $PT2</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="gameOverModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+    <div class="glass rounded-2xl p-6 mx-4 max-w-sm w-full text-center">
+      <div class="text-5xl mb-4">&#128557;</div>
+      <h2 class="text-2xl font-bold mb-2">Game Over!</h2>
+      <p class="text-gray-400 mb-4">The collection bar is full!</p>
+      <p class="text-lg mb-6">Your Score: <span class="text-emerald-light font-bold" id="finalScore">0</span></p>
+      <button class="btn-primary w-full py-3 rounded-xl font-semibold text-white" onclick="closeGameOver()">
+        Play Again
+      </button>
     </div>
   </div>
 
@@ -382,11 +519,11 @@
         <span class="text-xs font-medium">Home</span>
       </button>
       <button class="nav-item flex flex-col items-center gap-1 relative px-4 py-1 text-gray-400" onclick="navigate('tasks', this)">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
         <span class="text-xs font-medium">Tasks</span>
       </button>
       <button class="nav-item flex flex-col items-center gap-1 relative px-4 py-1 text-gray-400" onclick="navigate('referral', this)">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <span class="text-xs font-medium">Referral</span>
       </button>
       <button class="nav-item flex flex-col items-center gap-1 relative px-4 py-1 text-gray-400" onclick="navigate('leaderboard', this)">
@@ -396,27 +533,24 @@
     </div>
   </nav>
 
-  <!-- Adsterra Script -->
-  <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
-
   <script>
     // Game State
     let balance = parseInt(localStorage.getItem('pt2_balance')) || 10;
     let energy = parseInt(localStorage.getItem('pt2_energy')) || 100;
     let score = parseInt(localStorage.getItem('pt2_score')) || 0;
-    let moves = 15;
+    let gameLevel = parseInt(localStorage.getItem('pt2_gameLevel')) || 1;
     let shopLevel = parseInt(localStorage.getItem('pt2_shopLevel')) || 1;
-    let totalEarned = parseInt(localStorage.getItem('pt2_totalEarned')) || 0;
-    let customers = parseInt(localStorage.getItem('pt2_customers')) || 0;
     let todayEarnings = parseInt(localStorage.getItem('pt2_todayEarnings')) || 0;
-    let selectedGem = null;
+    let collectionBar = [];
 
-    const gemTypes = [
-      { name: 'emerald', color: '#007a3d', gradient: 'linear-gradient(135deg, #007a3d, #00a854)' },
-      { name: 'ruby', color: '#ee2d35', gradient: 'linear-gradient(135deg, #ee2d35, #ff4d55)' },
-      { name: 'gold', color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
-      { name: 'sapphire', color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)' },
-      { name: 'amethyst', color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
+    // Palestinian themed tiles
+    const tileTypes = [
+      { id: 'olive', icon: '&#127810;', name: 'Olive Branch' },
+      { id: 'dome', icon: '&#128332;', name: 'Dome of the Rock' },
+      { id: 'key', icon: '&#128273;', name: 'Key of Return' },
+      { id: 'watermelon', icon: '&#127817;', name: 'Watermelon' },
+      { id: 'sun', icon: '&#127773;', name: 'Sun' },
+      { id: 'bird', icon: '&#128330;', name: 'Dove of Peace' },
     ];
 
     // Telegram WebApp
@@ -438,24 +572,25 @@
       document.getElementById('energyValue').textContent = energy;
       document.getElementById('energyBar').style.width = energy + '%';
       document.getElementById('score').textContent = score.toLocaleString();
+      document.getElementById('gameLevel').textContent = gameLevel;
       document.getElementById('shopLevel').textContent = 'Level ' + shopLevel;
-      document.getElementById('profitHour').textContent = '+' + (5 * shopLevel) + ' $PT2';
-      document.getElementById('totalEarned').textContent = totalEarned + ' $PT2';
-      document.getElementById('customers').textContent = customers;
+      document.getElementById('profitHour').textContent = '+' + shopLevel + ' $PT2';
       document.getElementById('upgradeCost').textContent = '(' + (50 * shopLevel) + ' $PT2)';
+      document.getElementById('yourBalance').textContent = balance + ' $PT2';
+      document.getElementById('yourLevel').textContent = 'Level ' + shopLevel;
       updateEnergyStatus();
       updateDailyRewardButton();
       updateMandatoryProgress();
       initGameBoard();
+      initReferralLink();
     }
 
     function saveState() {
       localStorage.setItem('pt2_balance', balance);
       localStorage.setItem('pt2_energy', energy);
       localStorage.setItem('pt2_score', score);
+      localStorage.setItem('pt2_gameLevel', gameLevel);
       localStorage.setItem('pt2_shopLevel', shopLevel);
-      localStorage.setItem('pt2_totalEarned', totalEarned);
-      localStorage.setItem('pt2_customers', customers);
       localStorage.setItem('pt2_todayEarnings', todayEarnings);
     }
 
@@ -464,22 +599,32 @@
       if (amount > 0) todayEarnings += amount;
       document.getElementById('balance').textContent = balance.toLocaleString();
       document.getElementById('todayEarnings').textContent = '+' + todayEarnings + ' $PT2';
+      document.getElementById('yourBalance').textContent = balance + ' $PT2';
       saveState();
     }
 
     function updateEnergyStatus() {
       const statusEl = document.getElementById('energyStatus');
-      const refillEl = document.getElementById('refillTime');
       if (energy >= 100) {
         statusEl.textContent = 'Max Energy!';
-        refillEl.textContent = 'Full';
       } else {
-        statusEl.textContent = '';
-        refillEl.textContent = '5:00';
+        statusEl.textContent = energy + '/100';
       }
     }
 
-    // Daily Reward with 24-hour cooldown
+    // Navigation
+    function navigate(page, el) {
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      document.getElementById('page-' + page).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(function(item) {
+        item.classList.remove('active');
+        item.classList.add('text-gray-400');
+      });
+      el.classList.add('active');
+      el.classList.remove('text-gray-400');
+    }
+
+    // Daily Reward (5 $PT2, 24hr cooldown)
     function claimDailyReward() {
       const lastClaim = localStorage.getItem('pt2_lastDailyReward');
       const now = Date.now();
@@ -493,11 +638,10 @@
         return;
       }
 
-      const reward = Math.floor(Math.random() * 50) + 25;
-      updateBalance(reward);
+      updateBalance(5);
       localStorage.setItem('pt2_lastDailyReward', now.toString());
       updateDailyRewardButton();
-      showAlert('You claimed ' + reward + ' $PT2!');
+      showAlert('You claimed 5 $PT2!');
     }
 
     function updateDailyRewardButton() {
@@ -517,14 +661,146 @@
         btn.disabled = true;
         if (ping) ping.classList.add('hidden');
       } else {
-        btnText.textContent = 'Claim Daily Reward';
+        btnText.textContent = 'Claim Daily Reward (+5 $PT2)';
         btn.classList.remove('opacity-60');
         btn.disabled = false;
         if (ping) ping.classList.remove('hidden');
       }
     }
 
-    // Mandatory Tasks
+    // Tile Match Game
+    function initGameBoard() {
+      const board = document.getElementById('gameBoard');
+      board.innerHTML = '';
+      collectionBar = [];
+      updateCollectionBar();
+      
+      const totalTiles = 36;
+      for (let i = 0; i < totalTiles; i++) {
+        const tile = tileTypes[Math.floor(Math.random() * tileTypes.length)];
+        const tileEl = document.createElement('div');
+        tileEl.className = 'tile aspect-square rounded-lg bg-surface-light flex items-center justify-center text-2xl cursor-pointer hover:bg-surface transition-all';
+        tileEl.innerHTML = tile.icon;
+        tileEl.dataset.type = tile.id;
+        tileEl.dataset.index = i;
+        tileEl.onclick = function() { selectTile(this, tile.id, tile.icon); };
+        board.appendChild(tileEl);
+      }
+    }
+
+    function selectTile(el, type, icon) {
+      if (collectionBar.length >= 7) return;
+      
+      el.classList.add('animate-tile-pop');
+      setTimeout(function() {
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+      }, 150);
+
+      collectionBar.push({ type: type, icon: icon });
+      updateCollectionBar();
+      checkForMatch();
+    }
+
+    function updateCollectionBar() {
+      const slots = document.querySelectorAll('#collectionBar .collection-slot');
+      slots.forEach(function(slot, i) {
+        if (collectionBar[i]) {
+          slot.innerHTML = '<span class="text-2xl animate-slide-in">' + collectionBar[i].icon + '</span>';
+          slot.classList.add('filled');
+        } else {
+          slot.innerHTML = '';
+          slot.classList.remove('filled');
+        }
+      });
+    }
+
+    function checkForMatch() {
+      const typeCounts = {};
+      collectionBar.forEach(function(tile) {
+        typeCounts[tile.type] = (typeCounts[tile.type] || 0) + 1;
+      });
+
+      for (const type in typeCounts) {
+        if (typeCounts[type] >= 3) {
+          setTimeout(function() { clearMatch(type); }, 300);
+          return;
+        }
+      }
+
+      if (collectionBar.length >= 7) {
+        setTimeout(gameOver, 500);
+      }
+    }
+
+    function clearMatch(type) {
+      let removed = 0;
+      collectionBar = collectionBar.filter(function(tile) {
+        if (tile.type === type && removed < 3) {
+          removed++;
+          return false;
+        }
+        return true;
+      });
+
+      score += 30;
+      document.getElementById('score').textContent = score.toLocaleString();
+      updateCollectionBar();
+      saveState();
+
+      // Check level up
+      if (score > 0 && score % 300 === 0) {
+        gameLevel++;
+        document.getElementById('gameLevel').textContent = gameLevel;
+        updateBalance(2);
+        showAlert('Level Up! You are now Level ' + gameLevel + '. +2 $PT2!');
+      }
+
+      // Check if board is cleared
+      const remainingTiles = document.querySelectorAll('#gameBoard .tile[style*="visibility: visible"], #gameBoard .tile:not([style*="visibility"])');
+      let visibleCount = 0;
+      remainingTiles.forEach(function(t) {
+        if (t.style.visibility !== 'hidden') visibleCount++;
+      });
+      
+      if (visibleCount === 0 && collectionBar.length === 0) {
+        updateBalance(5);
+        showAlert('Board Cleared! +5 $PT2. Starting new round...');
+        setTimeout(initGameBoard, 1000);
+      }
+    }
+
+    function gameOver() {
+      document.getElementById('finalScore').textContent = score.toLocaleString();
+      document.getElementById('gameOverModal').classList.remove('hidden');
+    }
+
+    function closeGameOver() {
+      document.getElementById('gameOverModal').classList.add('hidden');
+      newGame();
+    }
+
+    function newGame() {
+      score = 0;
+      document.getElementById('score').textContent = '0';
+      initGameBoard();
+      saveState();
+    }
+
+    function shuffleBoard() {
+      if (energy >= 10) {
+        energy -= 10;
+        document.getElementById('energyValue').textContent = energy;
+        document.getElementById('energyBar').style.width = energy + '%';
+        updateEnergyStatus();
+        saveState();
+        initGameBoard();
+      } else {
+        showAlert('Not enough energy! Watch an ad to get more.');
+      }
+    }
+
+    // Mandatory Tasks (2 $PT2 each)
     function completeMandatoryTask(taskId, url) {
       const storageKey = 'pt2_mandatory_' + taskId;
       if (localStorage.getItem(storageKey) === 'true') {
@@ -536,10 +812,10 @@
 
       setTimeout(function() {
         localStorage.setItem(storageKey, 'true');
-        updateBalance(5);
+        updateBalance(2);
         markTaskComplete(taskId);
         updateMandatoryProgress();
-        showAlert('Task completed! +5 $PT2 added.');
+        showAlert('Task completed! +2 $PT2 added.');
       }, 3000);
     }
 
@@ -547,7 +823,7 @@
       const taskEl = document.getElementById('task-' + taskId);
       if (taskEl) {
         const btn = taskEl.querySelector('button');
-        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+        btn.innerHTML = '&#10003;';
         btn.disabled = true;
         btn.classList.remove('btn-primary');
         btn.classList.add('bg-emerald/30', 'text-emerald-light', 'cursor-not-allowed');
@@ -576,7 +852,7 @@
       }
     }
 
-    // Social Tasks
+    // Social Tasks (2 $PT2 each)
     function completeSocialTask(taskId, url) {
       const storageKey = 'pt2_social_' + taskId;
       if (localStorage.getItem(storageKey) === 'true') {
@@ -588,51 +864,43 @@
 
       setTimeout(function() {
         localStorage.setItem(storageKey, 'true');
-        updateBalance(10);
+        updateBalance(2);
         const taskEl = document.getElementById('task-' + taskId);
         if (taskEl) {
           const btn = taskEl.querySelector('button');
-          btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+          btn.innerHTML = '&#10003;';
           btn.disabled = true;
           btn.classList.remove('btn-primary');
           btn.classList.add('bg-emerald/30', 'text-emerald-light', 'cursor-not-allowed');
           taskEl.classList.add('completed');
         }
-        showAlert('Task completed! +10 $PT2 added.');
+        showAlert('Task completed! +2 $PT2 added.');
       }, 3000);
     }
 
-    // Watch Ad (Adsterra)
+    // Watch Ad (1 $PT2) - Adsterra
     function watchAd() {
       showAlert('Loading ad... Please wait.');
+      window.open('https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js', '_blank');
       
-      // Open ad in new window
-      const adWindow = window.open('about:blank', '_blank');
-      if (adWindow) {
-        adWindow.document.write('<html><head><title>Ad</title><style>body{background:#0a0a0f;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:sans-serif;color:white;}</style></head><body><div style="text-align:center;"><p>Loading advertisement...</p><script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"><\/script></div></body></html>');
-      }
-
       setTimeout(function() {
-        updateBalance(6);
-        showAlert('Ad watched! +6 $PT2 added.');
+        updateBalance(1);
+        showAlert('Ad watched! +1 $PT2 added.');
       }, 5000);
     }
 
     function watchAdForEnergy() {
       showAlert('Loading ad for energy...');
-      
-      const adWindow = window.open('about:blank', '_blank');
-      if (adWindow) {
-        adWindow.document.write('<html><head><title>Ad</title><style>body{background:#0a0a0f;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:sans-serif;color:white;}</style></head><body><div style="text-align:center;"><p>Loading advertisement...</p><script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"><\/script></div></body></html>');
-      }
+      window.open('https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js', '_blank');
 
       setTimeout(function() {
         energy = Math.min(100, energy + 20);
         document.getElementById('energyValue').textContent = energy;
         document.getElementById('energyBar').style.width = energy + '%';
         updateEnergyStatus();
+        updateBalance(1);
         saveState();
-        showAlert('Energy restored! +20 Energy.');
+        showAlert('Energy restored! +20 Energy and +1 $PT2.');
       }, 5000);
     }
 
@@ -643,8 +911,9 @@
         updateBalance(-cost);
         shopLevel++;
         document.getElementById('shopLevel').textContent = 'Level ' + shopLevel;
-        document.getElementById('profitHour').textContent = '+' + (5 * shopLevel) + ' $PT2';
+        document.getElementById('profitHour').textContent = '+' + shopLevel + ' $PT2';
         document.getElementById('upgradeCost').textContent = '(' + (50 * shopLevel) + ' $PT2)';
+        document.getElementById('yourLevel').textContent = 'Level ' + shopLevel;
         saveState();
         showAlert('Shop upgraded to Level ' + shopLevel + '!');
       } else {
@@ -652,125 +921,53 @@
       }
     }
 
-    // Game Board
-    function initGameBoard() {
-      const board = document.getElementById('gameBoard');
-      board.innerHTML = '';
-      for (let i = 0; i < 36; i++) {
-        const gem = gemTypes[Math.floor(Math.random() * gemTypes.length)];
-        const gemEl = document.createElement('div');
-        gemEl.className = 'gem aspect-square rounded-lg flex items-center justify-center';
-        gemEl.style.background = gem.gradient;
-        gemEl.style.boxShadow = '0 4px 15px ' + gem.color + '40';
-        gemEl.dataset.index = i;
-        gemEl.dataset.type = gem.name;
-        const inner = document.createElement('div');
-        inner.className = 'w-3/4 h-3/4 rounded-md opacity-50';
-        inner.style.background = 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent)';
-        gemEl.appendChild(inner);
-        gemEl.addEventListener('click', function() { handleGemClick(gemEl, i); });
-        board.appendChild(gemEl);
-      }
-    }
-
-    function handleGemClick(gemEl, index) {
-      if (selectedGem === null) {
-        selectedGem = index;
-        gemEl.classList.add('selected');
-      } else if (selectedGem === index) {
-        gemEl.classList.remove('selected');
-        selectedGem = null;
-      } else {
-        const row1 = Math.floor(selectedGem / 6);
-        const col1 = selectedGem % 6;
-        const row2 = Math.floor(index / 6);
-        const col2 = index % 6;
-        const isAdjacent = (Math.abs(row1 - row2) === 1 && col1 === col2) || (Math.abs(col1 - col2) === 1 && row1 === row2);
-
-        if (isAdjacent && moves > 0) {
-          swapGems(selectedGem, index);
-          moves--;
-          document.getElementById('moves').textContent = moves;
-          const points = Math.floor(Math.random() * 50) + 10;
-          score += points;
-          document.getElementById('score').textContent = score.toLocaleString();
-          saveState();
-        }
-
-        document.querySelectorAll('.gem').forEach(function(g) { g.classList.remove('selected'); });
-        selectedGem = null;
-      }
-    }
-
-    function swapGems(index1, index2) {
-      const gems = document.querySelectorAll('.gem');
-      const gem1 = gems[index1];
-      const gem2 = gems[index2];
-      const tempBg = gem1.style.background;
-      const tempShadow = gem1.style.boxShadow;
-      const tempType = gem1.dataset.type;
-      gem1.style.background = gem2.style.background;
-      gem1.style.boxShadow = gem2.style.boxShadow;
-      gem1.dataset.type = gem2.dataset.type;
-      gem2.style.background = tempBg;
-      gem2.style.boxShadow = tempShadow;
-      gem2.dataset.type = tempType;
-    }
-
-    function shuffleBoard() {
-      if (energy >= 10) {
-        energy -= 10;
-        document.getElementById('energyValue').textContent = energy;
-        document.getElementById('energyBar').style.width = energy + '%';
-        updateEnergyStatus();
-        saveState();
-        initGameBoard();
-        moves = 15;
-        document.getElementById('moves').textContent = moves;
-      } else {
-        showAlert('Not enough energy! Watch an ad to get more.');
-      }
+    // Referral
+    function initReferralLink() {
+      const oderId = localStorage.getItem('pt2_oderId') || Math.random().toString(36).substr(2, 8);
+      localStorage.setItem('pt2_oderId', oderId);
+      document.getElementById('referralLink').textContent = 'https://t.me/PT2Bot?start=ref_' + oderId;
     }
 
     function shareReferral() {
-      const referralLink = 'https://t.me/PalestineToken2Bot?start=ref_' + Math.random().toString(36).substr(2, 9);
+      const link = document.getElementById('referralLink').textContent;
       if (navigator.share) {
-        navigator.share({ title: 'Palestine Token2 Game', text: 'Join me on Palestine Token2 Game and earn $PT2!', url: referralLink });
+        navigator.share({ title: 'Palestine Token2 Game', text: 'Join me on PT2 and earn $PT2!', url: link });
       } else if (tg && tg.openTelegramLink) {
-        tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(referralLink) + '&text=' + encodeURIComponent('Join me on Palestine Token2 Game!'));
+        tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Join me on Palestine Token2 Game!'));
       } else {
-        navigator.clipboard.writeText(referralLink);
+        navigator.clipboard.writeText(link);
         showAlert('Referral link copied to clipboard!');
       }
     }
 
-    function navigate(section, el) {
-      document.querySelectorAll('.nav-item').forEach(function(item) {
-        item.classList.remove('active');
-        item.classList.add('text-gray-400');
+    // Check completed social tasks on load
+    function checkCompletedSocialTasks() {
+      ['twitter', 'youtube'].forEach(function(taskId) {
+        if (localStorage.getItem('pt2_social_' + taskId) === 'true') {
+          const taskEl = document.getElementById('task-' + taskId);
+          if (taskEl) {
+            const btn = taskEl.querySelector('button');
+            btn.innerHTML = '&#10003;';
+            btn.disabled = true;
+            btn.classList.remove('btn-primary');
+            btn.classList.add('bg-emerald/30', 'text-emerald-light', 'cursor-not-allowed');
+            taskEl.classList.add('completed');
+          }
+        }
       });
-      el.classList.add('active');
-      el.classList.remove('text-gray-400');
     }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
       initUI();
+      checkCompletedSocialTasks();
 
-      // Profit per minute simulation
+      // Profit per hour simulation (1 $PT2 per level per hour = every 60s for demo)
       setInterval(function() {
-        const profit = Math.floor((5 * shopLevel) / 60);
-        if (profit > 0) {
-          updateBalance(profit);
-          customers++;
-          totalEarned += profit;
-          document.getElementById('customers').textContent = customers;
-          document.getElementById('totalEarned').textContent = totalEarned + ' $PT2';
-          saveState();
-        }
-      }, 60000);
+        updateBalance(shopLevel);
+      }, 3600000 / shopLevel);
 
-      // Energy regeneration
+      // Energy regeneration (1 per 30s)
       setInterval(function() {
         if (energy < 100) {
           energy++;
@@ -781,25 +978,8 @@
         }
       }, 30000);
 
-      // Update daily reward button
-      setInterval(function() {
-        updateDailyRewardButton();
-      }, 60000);
-
-      // Check social tasks completion state
-      ['twitter'].forEach(function(taskId) {
-        if (localStorage.getItem('pt2_social_' + taskId) === 'true') {
-          const taskEl = document.getElementById('task-' + taskId);
-          if (taskEl) {
-            const btn = taskEl.querySelector('button');
-            btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-            btn.disabled = true;
-            btn.classList.remove('btn-primary');
-            btn.classList.add('bg-emerald/30', 'text-emerald-light', 'cursor-not-allowed');
-            taskEl.classList.add('completed');
-          }
-        }
-      });
+      // Update daily reward button every minute
+      setInterval(updateDailyRewardButton, 60000);
     });
   </script>
 </body>
