@@ -1,131 +1,332 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palestine Token2</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
-    <style>
-        :root { --primary: #007a3d; --secondary: #ee2d35; --bg: #0a0a0a; --card: #151515; }
-        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; padding: 15px; text-align: center; user-select: none; }
-        .balance-card { background: linear-gradient(145deg, #111, #1a1a1a); border-radius: 20px; padding: 25px; margin-bottom: 20px; border-bottom: 4px solid var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        #balance { font-size: 38px; font-weight: 900; color: var(--primary); margin: 10px 0; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .item-card { background: var(--card); border-radius: 18px; padding: 20px; border: 1px solid #222; position: relative; overflow: hidden; }
-        .btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px; }
-        .btn-puzzle { background: var(--secondary); }
-        .btn:active { transform: scale(0.95); }
-        .stats { font-size: 13px; color: #888; margin-bottom: 5px; }
-        #energy-bar { background: #222; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden; }
-        #energy-fill { background: var(--secondary); height: 100%; width: 100%; transition: 0.5s; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Palestine Token2 Game | Play. Earn. Support.</title>
+  <meta name="description" content="A premium crypto-game Mini App featuring Match-3 puzzles, Tea Tycoon management, and daily rewards.">
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              DEFAULT: '#007a3d',
+              light: '#00a854',
+              dark: '#005c2e',
+            },
+            ruby: {
+              DEFAULT: '#ee2d35',
+              light: '#ff4d55',
+              dark: '#cc1f26',
+            },
+            background: '#0a0a0f',
+            surface: '#12121a',
+            'surface-light': '#1a1a25',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* كل الـ CSS الخاص بك كما هو بدون أي تعديل */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0f; color: #ffffff; min-height: 100vh; overflow-x: hidden; }
+    .glass { background: rgba(18, 18, 26, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .glass-light { background: rgba(26, 26, 37, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glow-text { text-shadow: 0 0 20px rgba(0, 122, 61, 0.8), 0 0 40px rgba(0, 122, 61, 0.6), 0 0 60px rgba(0, 122, 61, 0.4); }
+    .glow-text-ruby { text-shadow: 0 0 20px rgba(238, 45, 53, 0.8), 0 0 40px rgba(238, 45, 53, 0.6); }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(0, 122, 61, 0.4); } 50% { box-shadow: 0 0 40px rgba(0, 122, 61, 0.8), 0 0 60px rgba(0, 122, 61, 0.4); } }
+    @keyframes energy-flow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes gem-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    .animate-energy-flow { background-size: 200% 100%; animation: energy-flow 2s linear infinite; }
+    .animate-float { animation: float 3s ease-in-out infinite; }
+    .animate-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); background-size: 200% 100%; animation: shimmer 2s infinite; }
+    .energy-bar { background: linear-gradient(90deg, #007a3d, #00a854, #007a3d); background-size: 200% 100%; animation: energy-flow 2s linear infinite; }
+    .energy-bar-container { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 122, 61, 0.3); }
+    .gem { transition: all 0.2s ease; cursor: pointer; }
+    .gem:hover { transform: scale(1.1); filter: brightness(1.2); }
+    .gem:active { transform: scale(0.95); }
+    .gem.selected { animation: gem-pulse 0.5s ease-in-out infinite; box-shadow: 0 0 20px currentColor; }
+    .btn-primary { background: linear-gradient(135deg, #007a3d, #00a854); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 122, 61, 0.4); }
+    .btn-ruby { background: linear-gradient(135deg, #ee2d35, #ff4d55); transition: all 0.3s ease; }
+    .btn-ruby:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(238, 45, 53, 0.4); }
+    .ambient-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at 20% 20%, rgba(0, 122, 61, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(238, 45, 53, 0.1) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(0, 122, 61, 0.05) 0%, transparent 70%); }
+    .nav-item { transition: all 0.3s ease; }
+    .nav-item:hover { color: #007a3d; }
+    .nav-item.active { color: #007a3d; }
+    .nav-item.active::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #007a3d; border-radius: 50%; box-shadow: 0 0 10px #007a3d; }
+    .task-card { transition: all 0.3s ease; }
+    .task-card:hover { transform: translateX(4px); border-color: rgba(0, 122, 61, 0.3); }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #12121a; }
+    ::-webkit-scrollbar-thumb { background: #007a3d; border-radius: 4px; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
 </head>
-<body>
-
-    <div class="balance-card">
-        <div class="stats">رصيد $PT2</div>
-        <div id="balance">0.00</div>
-        <div class="stats">الأرباح التلقائية: 0.0001 / ساعة</div>
-    </div>
-
-    <div class="grid">
-        <div class="item-card">
-            <div style="font-size: 18px; font-weight: bold;">🏪 كافتيريا الشاي (Tea Tycoon)</div>
-            <div class="stats">المستوى: 1</div>
-            <button class="btn" onclick="upgrade()">ترقية المتجر 🚀</button>
-        </div>
-
-        <div class="item-card">
-            <div style="display: flex; justify-content: space-between;">
-                <span>⚡ الطاقة: <span id="energy-val">100</span>/100</span>
+<body class="bg-background text-white">
+  <div class="ambient-bg"></div>
+  <div class="relative z-10 min-h-screen pb-24">
+    <header class="p-4">
+      <div class="glass rounded-2xl p-5 animate-pulse-glow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
             </div>
-            <div id="energy-bar"><div id="energy-fill"></div></div>
-            <button class="btn btn-puzzle" onclick="startPuzzle()">لعب الألغاز (Puzzle) 🧩</button>
+            <div>
+              <p class="text-xs text-gray-400 uppercase tracking-wider">$PT2 Balance</p>
+              <p class="text-3xl font-bold glow-text text-emerald-light" id="balance">10</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-gray-400">Today's Earnings</p>
+            <p class="text-lg font-semibold text-emerald-light">+248 $PT2</p>
+          </div>
         </div>
+        <button class="btn-ruby w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 relative overflow-hidden" onclick="claimDailyReward()">
+          <span class="absolute top-2 right-2 w-2 h-2 bg-white rounded-full animate-ping"></span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+          </svg>
+          <span>Claim Daily Reward</span>
+        </button>
+      </div>
+    </header>
 
-        <div class="item-card" style="border-color: var(--secondary);">
-            <div style="font-size: 16px;">📺 مهمة إعلانية مميزة</div>
-            <div style="color: var(--primary); font-weight: bold; margin: 5px 0;">اربح +6.00 $PT2</div>
-            <button class="btn" style="background: #333;" onclick="watchAd()">بدء المهمة الآن 💰</button>
+    <section class="px-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <span class="text-2xl">&#129483;</span> Tea Tycoon
+        </h2>
+        <span class="px-3 py-1 rounded-full bg-emerald/20 text-emerald-light text-xs font-semibold">Level 7</span>
+      </div>
+      <div class="glass-light rounded-2xl p-4">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-3xl animate-float"> &#129483; </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-white mb-1">Bubble Tea Shop</h3>
+            <div class="flex items-center gap-4 text-sm">
+              <div><span class="text-gray-400">Profit/Hour:</span><span class="text-emerald-light font-semibold ml-1">+48 $PT2</span></div>
+            </div>
+          </div>
         </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="bg-surface rounded-xl p-3 text-center">
+            <p class="text-xs text-gray-400 mb-1">Total Earned</p>
+            <p class="text-lg font-bold text-white">5,280 $PT2</p>
+          </div>
+          <div class="bg-surface rounded-xl p-3 text-center">
+            <p class="text-xs text-gray-400 mb-1">Customers Today</p>
+            <p class="text-lg font-bold text-white">127</p>
+          </div>
+        </div>
+        <button class="btn-primary w-full py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2" onclick="upgradeShop()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+          </svg>
+          <span>Upgrade Shop</span>
+          <span class="text-emerald-light/80 text-sm">(500 $PT2)</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="px-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <svg class="w-5 h-5 text-ruby" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          Puzzle Engine
+        </h2>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">Score:</span>
+          <span class="text-emerald-light font-bold" id="score">1,250</span>
+        </div>
+      </div>
+      <div class="glass-light rounded-2xl p-4">
+        <div class="grid grid-cols-6 gap-2" id="gameBoard"></div>
+        <div class="mt-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400">Moves:</span>
+            <span class="text-white font-semibold" id="moves">15</span>
+          </div>
+          <button class="px-4 py-2 rounded-lg bg-surface-light text-sm font-medium text-gray-300 hover:text-white transition-colors" onclick="shuffleBoard()"> Shuffle </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          Energy
+        </h2>
+        <span class="text-emerald-light font-semibold text-sm animate-pulse" id="energyStatus">Max Energy!</span>
+      </div>
+      <div class="glass-light rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-2xl font-bold text-white" id="energyValue">100</span>
+          <span class="text-gray-400">/100</span>
+        </div>
+        <div class="energy-bar-container h-4 rounded-full bg-surface overflow-hidden">
+          <div class="energy-bar h-full rounded-full transition-all duration-500" id="energyBar" style="width: 100%"></div>
+        </div>
+        <div class="mt-3 flex items-center justify-between text-sm">
+          <span class="text-gray-400">Refills in: <span class="text-white" id="refillTime">Full</span></span>
+          <button class="text-emerald-light font-medium hover:underline" onclick="watchAdForEnergy()">+20 Energy (Watch Ad)</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 mb-6">
+      <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        Task Center
+      </h2>
+      <div class="mb-4">
+        <h3 class="text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">Ad Tasks</h3>
+        <div class="space-y-2">
+          <div class="task-card glass-light rounded-xl p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div><p class="font-medium text-white">Watch Video Ad</p><p class="text-xs text-gray-400">30 seconds</p></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-light font-semibold text-sm">+6 $PT2</span>
+              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAd()">Watch</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/10 z-50">
+    <div class="flex items-center justify-around py-3 px-4 max-w-lg mx-auto">
+      <button class="nav-item active flex flex-col items-center gap-1 relative px-4 py-1" onclick="navigate('home')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span class="text-xs font-medium">Home</span>
+      </button>
+      <button class="nav-item flex flex-col items-center gap-1 relative px-4 py-1 text-gray-400" onclick="navigate('tasks')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <span class="text-xs font-medium">Tasks</span>
+      </button>
     </div>
+  </nav>
 
-    <div id="loader" class="overlay">
-        <div style="border: 4px solid #f3f3f3; border-top: 4px solid var(--secondary); border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite;"></div>
-        <p>جاري التحقق من المهمة... <span id="timer">30</span>ث</p>
-    </div>
+  <script>
+    // الإعدادات الأساسية
+    let tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+    const gemTypes = [
+      { name: 'emerald', color: '#007a3d', gradient: 'linear-gradient(135deg, #007a3d, #00a854)' },
+      { name: 'ruby', color: '#ee2d35', gradient: 'linear-gradient(135deg, #ee2d35, #ff4d55)' },
+      { name: 'gold', color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
+      { name: 'sapphire', color: '#3b82f6', gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)' },
+      { name: 'amethyst', color: '#8b5cf6', gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
+    ];
 
-        // البيانات الأساسية (Logic)
-        let balance = 0.00;
-        let energy = 100;
-        const AD_LINK = "https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js";
+    let selectedGem = null;
+    let balance = 10; // رصيد البداية 10 عملات كما طلبت
+    let energy = 100;
+    let score = 1250;
+    let moves = 15;
 
-        // تحديث الرصيد التلقائي (قليل جداً كما طلبت)
-        setInterval(() => {
-            balance += 0.00000003; 
-            updateUI();
-        }, 1000);
+    function initGameBoard() {
+      const board = document.getElementById('gameBoard');
+      board.innerHTML = '';
+      for (let i = 0; i < 36; i++) {
+        const gem = gemTypes[Math.floor(Math.random() * gemTypes.length)];
+        const gemEl = document.createElement('div');
+        gemEl.className = 'gem aspect-square rounded-lg flex items-center justify-center';
+        gemEl.style.background = gem.gradient;
+        gemEl.style.boxShadow = `0 4px 15px ${gem.color}40`;
+        board.appendChild(gemEl);
+      }
+    }
 
-        function updateUI() {
-            document.getElementById('balance').innerText = balance.toFixed(4);
-            document.getElementById('energy-val').innerText = energy;
-            document.getElementById('energy-fill').style.width = energy + "%";
-        }
+    // وظيفة مشاهدة الإعلانات (Adsterra)
+    function watchAd() {
+      window.open("https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js", "_blank");
+      setTimeout(() => {
+        balance += 6;
+        document.getElementById('balance').innerText = balance.toLocaleString();
+        tg.showAlert("تمت مشاهدة الإعلان! حصلت على +6 عملات.");
+      }, 2000);
+    }
 
-        function upgrade() {
-            tg.showConfirm("هل تريد ترقية الكافتيريا مقابل 50 $PT2؟", (ok) => {
-                if(ok) {
-                    if(balance >= 50) {
-                        balance -= 50;
-                        tg.showAlert("✅ تمت الترقية بنجاح!");
-                    } else {
-                        tg.showAlert("❌ رصيدك غير كافٍ للترقية حالياً.");
-                    }
-                }
-            });
-        }
+    function watchAdForEnergy() {
+      window.open("https://pl29197374.profitablecpmratenetwork.com/4a/a8/65/4aa86588a74b5f50e9491eb2974ef3cd.js", "_blank");
+      setTimeout(() => {
+        energy = Math.min(100, energy + 20);
+        updateEnergyUI();
+        tg.showAlert("تم شحن الطاقة! +20⚡");
+      }, 2000);
+    }
 
-        function watchAd() {
-            window.open(AD_LINK, "_blank");
-            startTimer(30, 6);
-        }
+    function updateEnergyUI() {
+      document.getElementById('energyValue').textContent = energy;
+      document.getElementById('energyBar').style.width = energy + '%';
+    }
 
-        function startPuzzle() {
-            if(energy >= 20) {
-                energy -= 20;
-                startTimer(15, 2); // ربح بسيط من اللعب
-            } else {
-                tg.showAlert("⚡ الطاقة منخفضة! انتظر الشحن التلقائي.");
-            }
-        }
+    function claimDailyReward() {
+      balance += 50;
+      document.getElementById('balance').innerText = balance.toLocaleString();
+      tg.showAlert("حصلت على المكافأة اليومية!");
+    }
 
-        function startTimer(seconds, reward) {
-            let timeLeft = seconds;
-            const overlay = document.getElementById('loader');
-            const timerText = document.getElementById('timer');
-            
-            overlay.style.display = "flex";
-            
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerText.innerText = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(interval);
-                    overlay.style.display = "none";
-                    balance += reward;
-                    updateUI();
-                    tg.HapticFeedback.notificationOccurred('success');
-                    tg.showAlert(`✅ أحسنت! تمت إضافة ${reward} $PT2 لرصيدك.`);
-                }
-            }, 1000);
-        }
-    </script>
-    <style> @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } </style>
+    function upgradeShop() {
+      if (balance >= 500) {
+        balance -= 500;
+        document.getElementById('balance').innerText = balance.toLocaleString();
+        tg.showAlert("تمت ترقية المتجر!");
+      } else {
+        tg.showAlert("رصيدك غير كافٍ!");
+      }
+    }
+
+    function navigate(section) {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        item.classList.add('text-gray-400');
+      });
+      event.currentTarget.classList.add('active');
+      event.currentTarget.classList.remove('text-gray-400');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initGameBoard();
+    });
+  </script>
 </body>
 </html>
