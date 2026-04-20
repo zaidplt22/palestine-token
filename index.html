@@ -923,10 +923,11 @@
 
     // Referral
     function initReferralLink() {
-      const oderId = localStorage.getItem('pt2_oderId') || Math.random().toString(36).substr(2, 8);
-      localStorage.setItem('pt2_oderId', oderId);
-      document.getElementById('referralLink').textContent = 'https://t.me/PT2Bot?start=ref_' + oderId;
-    }
+  const oderId = localStorage.getItem('pt2_oderId') || Math.random().toString(36).substr(2, 8);
+  localStorage.setItem('pt2_oderId', oderId);
+  // تأكد من تعديل المعرف هنا ليطابق بوتك
+  document.getElementById('referralLink').textContent = 'https://t.me/PalestinePLT2_bot?start=ref_' + oderId;
+}
 
     function shareReferral() {
       const link = document.getElementById('referralLink').textContent;
