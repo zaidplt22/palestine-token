@@ -545,7 +545,13 @@
 
   <script>
     // Game State
-const AdController = window.Adsgram.init({ blockId: "28189" });
+let AdController;
+try {
+    AdController = (window.Adsgram) ? window.Adsgram.init({ blockId: "28189" }) : { show: () => Promise.reject() };
+} catch (e) {
+    console.log("Adsgram not loaded");
+    AdController = { show: () => Promise.reject() };
+}
     let balance = parseInt(localStorage.getItem('pt2_balance')) || 10;
     let energy = parseInt(localStorage.getItem('pt2_energy')) || 100;
     let score = parseInt(localStorage.getItem('pt2_score')) || 0;
@@ -952,28 +958,35 @@ const AdController = window.Adsgram.init({ blockId: "28189" });
       setInterval(updateDailyRewardButton, 60000);
     });
 // 丿丕賱丞 丕賱丨氐賵賱 毓賱賶 5 毓賲賱丕鬲 賲賳 丕賱廿毓賱丕賳
+// دالة الحصول على 5 عملات
 function showAdsgramReward() {
-    AdController.show().then(() => {
-        updateBalance(5); // 廿囟丕賮丞 丕賱乇氐賷丿
-        showAlert("賲亘乇賵賰! 丨氐賱鬲 毓賱賶 5 $PT2");
-    }).catch(() => {
-        showAlert("賷噩亘 賲卮丕賴丿丞 丕賱廿毓賱丕賳 賰丕賲賱丕賸 賱賱丨氐賵賱 毓賱賶 丕賱賲賰丕賮兀丞");
-    });
+    if (AdController && AdController.show) {
+        AdController.show().then(() => {
+            updateBalance(5);
+            showAlert("مبروك! حصلت على 5 $PT2");
+        }).catch(() => {
+            showAlert("يجب مشاهدة الإعلان كاملاً أو تأكد من فتح البوت من التليجرام");
+        });
+    } else {
+        showAlert("عذراً، نظام الإعلانات غير متاح حالياً في المتصفح");
+    }
 }
+
+// دالة الحصول على طاقة
 function watchAdForEnergy() {
-    AdController.show().then(() => {
-        energy = Math.min(100, energy + 20); // 夭賷丕丿丞 丕賱胤丕賯丞 20
-        document.getElementById('energyValue').textContent = energy;
-        document.getElementById('energyBar').style.width = energy + '%';
-        saveState();
-        showAlert("鬲賲 卮丨賳 20 胤丕賯丞 亘賳噩丕丨!");
-    }).catch(() => {
-        showAlert("賷噩亘 賲卮丕賴丿丞 丕賱廿毓賱丕賳 賱賱丨氐賵賱 毓賱賶 丕賱胤丕賯丞");
-    });
-}
-// 乇亘胤 丿丕賱丞 watchAd 亘賳賮爻 賳馗丕賲 丕賱賲賰丕賮丌鬲
-function watchAd() {
-    showAdsgramReward();
+    if (AdController && AdController.show) {
+        AdController.show().then(() => {
+            energy = Math.min(100, energy + 20);
+            document.getElementById('energyValue').textContent = energy;
+            document.getElementById('energyBar').style.width = energy + '%';
+            saveState();
+            showAlert("تم شحن 20 طاقة بنجاح!");
+        }).catch(() => {
+            showAlert("يجب مشاهدة الإعلان للحصول على الطاقة");
+        });
+    } else {
+        showAlert("عذراً، نظام الإعلانات غير متاح حالياً");
+    }
 }
   </script>
 </body>
