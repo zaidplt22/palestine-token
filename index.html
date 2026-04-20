@@ -263,65 +263,39 @@
 
       <!-- Ad Tasks -->
            <section class="px-4 mb-6">
-        <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          Ad Tasks
-        </h2>
-        <div class="glass-light rounded-2xl p-4 space-y-2">
-          
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-xl">馃摵</div>
-              <div>
-                <p class="font-medium text-white">Watch Video Ad</p>
-                <p class="text-xs text-gray-400">Earn rewards</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-emerald-light font-semibold text-sm">+5 $PT2</span>
-              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="showAdsgramReward()">Watch</button>
-            </div>
-          </div>
-
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-xl">馃摻锔�</div>
-              <div>
-                <p class="font-medium text-white">Watch Another Ad</p>
-                <p class="text-xs text-gray-400">More earnings</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-emerald-light font-semibold text-sm">+5 $PT2</span>
-              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAd()">Watch</button>
-            </div>
-          </div>
-
-          <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xl">鈿�</div>
-              <div>
-                <p class="font-medium text-white">Watch for Energy</p>
-                <p class="text-xs text-gray-400">Refill energy bar</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-yellow-400 font-semibold text-sm">+20 Energy</span>
-              <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAdForEnergy()">Watch</button>
-            </div>
-          </div>
-
+  <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    Ad Tasks
+  </h2>
+  <div class="glass-light rounded-2xl p-4 space-y-2">
+    
+    <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-xl">📺</div>
+        <div>
+          <p class="font-medium text-white text-sm">Watch Ad & Earn</p>
+          <p class="text-xs text-emerald-light">+5 $PT2</p>
         </div>
-      </section>
-<div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between mb-2">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-lg bg-emerald/20 flex items-center justify-center text-xl">馃摵</div>
-    <div>
-      <p class="font-medium text-white text-sm">卮丕賴丿 廿毓賱丕賳 賵丕乇亘丨</p>
-      <p class="text-xs text-emerald-light">+5 $PT2</p>
+      </div>
+      <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="showAdsgramReward()">Watch</button>
+    </div>
+
+    <div class="task-card bg-surface rounded-xl p-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-xl">⚡</div>
+        <div>
+          <p class="font-medium text-white text-sm">Watch for Energy</p>
+          <p class="text-xs text-yellow-400">+20 Energy</p>
+        </div>
+      </div>
+      <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="watchAdForEnergy()">Watch</button>
+    </div>
+
+  </div>
+</section>
     </div>
   </div>
   <button class="btn-primary px-4 py-2 rounded-lg text-sm font-medium" onclick="showAdsgramReward()">Watch</button>
@@ -941,37 +915,38 @@ try {
       // Update daily reward button every minute
       setInterval(updateDailyRewardButton, 60000);
     });
-// 丿丕賱丞 丕賱丨氐賵賱 毓賱賶 5 毓賲賱丕鬲 賲賳 丕賱廿毓賱丕賳
-// دالة الحصول على 5 عملات
+// دالة الحصول على 5 عملات من الإعلان
 function showAdsgramReward() {
     if (AdController && AdController.show) {
         AdController.show().then(() => {
             updateBalance(5);
-            showAlert("مبروك! حصلت على 5 $PT2");
+            showAlert("Congrats! You earned 5 $PT2");
         }).catch(() => {
-            showAlert("يجب مشاهدة الإعلان كاملاً أو تأكد من فتح البوت من التليجرام");
+            showAlert("Please watch the full ad to get your reward.");
         });
     } else {
-        showAlert("عذراً، نظام الإعلانات غير متاح حالياً في المتصفح");
+        showAlert("Ads are not available in browser mode.");
     }
 }
 
-// دالة الحصول على طاقة
+// دالة شحن الطاقة من الإعلان
 function watchAdForEnergy() {
     if (AdController && AdController.show) {
         AdController.show().then(() => {
             energy = Math.min(100, energy + 20);
             document.getElementById('energyValue').textContent = energy;
             document.getElementById('energyBar').style.width = energy + '%';
+            updateEnergyStatus();
             saveState();
-            showAlert("تم شحن 20 طاقة بنجاح!");
+            showAlert("Energy refilled by 20!");
         }).catch(() => {
-            showAlert("يجب مشاهدة الإعلان للحصول على الطاقة");
+            showAlert("Watch the full ad to get energy.");
         });
     } else {
-        showAlert("عذراً، نظام الإعلانات غير متاح حالياً");
+        showAlert("Ads are not available right now.");
     }
 }
+
   </script>
 </body>
 </html>
