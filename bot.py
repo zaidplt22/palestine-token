@@ -1,4 +1,5 @@
 import os
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler
 
@@ -14,7 +15,11 @@ async def start(update: Update, context):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-app = Application.builder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-print("✅ البوت يعمل الآن...")
-app.run_polling()
+async def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    print("✅ البوت يعمل الآن...")
+    await app.run_polling()
+
+if __name__ == "__main__":
+    asyncio.run(main())
