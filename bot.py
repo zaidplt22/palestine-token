@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 TOKEN = "8645932660:AAEe_6AKn74W9gJioEo9tHA_WQ3d3mLObm8"
 # الرابط الجديد الصحيح (من GitHub Pages)
-GAME_URL = "https://zaidplt22.github.io/palestine-token/"
+GAME_URL = "https://zaidplt22.github.io/palestine-token/app.html"
 
 @app.route('/')
 def home():
