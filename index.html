@@ -9,6 +9,8 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- مكتبة إعلانات Adsgram الرسمية -->
   <script src="https://cdn.adsgram.ai/js/adsgram.js"></script>
+  <!-- مكتبة تلغرام WebApp لإضافة الاهتزاز والتأثيرات -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -95,6 +97,10 @@
       font-family: inherit;
     }
 
+    .btn:active {
+      transform: scale(0.97);
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), rgba(16, 185, 129, 0.8));
       color: var(--primary-foreground);
@@ -159,6 +165,14 @@
 
   <script type="text/babel">
     const { useState, useEffect, useCallback, useMemo, useSyncExternalStore, createContext, useContext } = React;
+
+    // إضافة تأثير الاهتزاز من تلغرام (Haptic Feedback)
+    const tg = window.Telegram?.WebApp;
+    const hapticImpact = (style = 'light') => {
+      if (tg && tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred(style);
+      }
+    };
 
     // ==================== ARABIC WORD PUZZLES (70 LEVELS) ====================
     const ARABIC_PUZZLES = [
@@ -475,7 +489,10 @@
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setState({ currentTab: tab.id })}
+                  onClick={() => {
+                    setState({ currentTab: tab.id });
+                    hapticImpact('light');
+                  }}
                   style={{
                     position: 'relative', display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center', flex: 1, height: '100%',
@@ -557,17 +574,20 @@
         if (parseInt(captchaInput) === captcha.answer) {
           setState({ captchaSolved: true, captchaRequired: false });
           setCaptchaError(false);
+          hapticImpact('success');
         } else {
           setCaptchaError(true);
           const a = Math.floor(Math.random() * 10) + 1;
           const b = Math.floor(Math.random() * 10) + 1;
           setCaptcha({ question: `${a} + ${b} = ?`, answer: a + b });
           setCaptchaInput("");
+          hapticImpact('error');
         }
       };
 
       const startMining = () => {
         setState({ miningStartTime: Date.now(), miningProgress: 0, dailyMined: 0 });
+        hapticImpact('medium');
       };
 
       const claimReward = () => {
@@ -587,6 +607,7 @@
         });
         setCaptcha({ question: `${a} + ${b} = ?`, answer: a + b });
         setCaptchaInput("");
+        hapticImpact('heavy');
       };
 
       return (
@@ -783,7 +804,7 @@
       const [showReward, setShowReward] = useState(false);
       const [isProcessingMatch, setIsProcessingMatch] = useState(false);
 
-      // دالة المطابقة مع منع التكرار التلقائي
+      // دالة المطابقة مع منع التكرار التلقائي (تم إصلاحها)
       const checkMatches = useCallback((fromUserAction = false) => {
         // إذا كانت اللعبة منتهية أو لا توجد حركة من المستخدم فلا تفعل شيئًا
         if (gameState !== "playing") return;
@@ -820,14 +841,17 @@
           setState({ balance: balance + 6 });
           setGames({ candyLevel: level + 1, candyFreeBoosters: 3 });
           setTimeout(() => setShowReward(false), 2000);
+          hapticImpact('success');
         } else if (moves <= 0 && score < targetScore && gameState === "playing") {
           setGameState("lost");
+          hapticImpact('error');
         }
       }, [score, targetScore, moves, gameState, balance, level]);
 
       const handleCellClick = (i, j) => {
         if (gameState !== "playing") return;
         if (isProcessingMatch) return;
+        hapticImpact('light');
 
         if (activeBooster === "hammer") {
           const newBoard = board.map(row => row.map(cell => ({ ...cell })));
@@ -886,15 +910,17 @@
           setGames({ candyFreeBoosters: freeBoosters - 1 });
           if (type === "moves") {
             setMoves(m => m + 5);
+            hapticImpact('medium');
           } else {
             setActiveBooster(type);
+            hapticImpact('medium');
           }
         } else {
           setShowBoosterModal(true);
         }
       };
 
-      // دالة مشاهدة الإعلان الحقيقية مع Adsgram
+      // دالة مشاهدة الإعلان الحقيقية مع Adsgram (تم التأكد من الكود)
       const handleWatchAd = () => {
         if (typeof window.adsgram !== 'undefined') {
           const adController = window.adsgram.showAd({
@@ -903,10 +929,12 @@
               console.log("تم مشاهدة الإعلان بالكامل، مكافأة للمستخدم", data);
               setGames({ candyFreeBoosters: freeBoosters + 1 });
               setShowBoosterModal(false);
+              hapticImpact('success');
             },
             onError: (error) => {
               console.error("خطأ في عرض الإعلان", error);
               alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
+              hapticImpact('error');
             }
           });
         } else {
@@ -919,6 +947,7 @@
           setState({ balance: balance - 3 });
           setGames({ candyFreeBoosters: freeBoosters + 1 });
           setShowBoosterModal(false);
+          hapticImpact('heavy');
         }
       };
 
@@ -930,13 +959,17 @@
         setSelected(null);
         setActiveBooster(null);
         setIsProcessingMatch(false);
+        hapticImpact('medium');
       };
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 1rem 6rem' }}>
           {/* Header */}
           <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <button onClick={() => setState({ currentTab: "home" })} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
+            <button onClick={() => {
+              setState({ currentTab: "home" });
+              hapticImpact('light');
+            }} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
               <Icons.ChevronLeft />
             </button>
             <div style={{ textAlign: 'center' }}>
@@ -1130,11 +1163,13 @@
           setState({ balance: balance + 6 });
           setGames({ wordLevel: level + 1, wordFreeHints: 3 });
           setTimeout(() => setShowReward(false), 2000);
+          hapticImpact('success');
         }
       }, [foundWords, puzzle.words.length, gameState, balance, level]);
 
       const handleLetterClick = (index) => {
         if (gameState !== "playing") return;
+        hapticImpact('light');
 
         const existingIndex = selectedIndices.indexOf(index);
         if (existingIndex !== -1) {
@@ -1152,9 +1187,11 @@
         const word = currentWord;
         if (puzzle.words.includes(word) && !foundWords.includes(word)) {
           setFoundWords([...foundWords, word]);
+          hapticImpact('success');
         } else {
           setShakingWord(true);
           setTimeout(() => setShakingWord(false), 500);
+          hapticImpact('error');
         }
         setCurrentWord("");
         setSelectedIndices([]);
@@ -1163,6 +1200,7 @@
       const clearWord = () => {
         setCurrentWord("");
         setSelectedIndices([]);
+        hapticImpact('light');
       };
 
       const useHint = () => {
@@ -1176,6 +1214,7 @@
               newRevealed.set(word, currentRevealed + 1);
               setRevealedLetters(newRevealed);
               setGames({ wordFreeHints: freeHints - 1 });
+              hapticImpact('medium');
             }
           }
         } else {
@@ -1183,7 +1222,7 @@
         }
       };
 
-      // دالة مشاهدة الإعلان الحقيقية للكلمات
+      // دالة مشاهدة الإعلان الحقيقية للكلمات (تم التأكد من الكود)
       const handleWatchAd = () => {
         if (typeof window.adsgram !== 'undefined') {
           const adController = window.adsgram.showAd({
@@ -1192,10 +1231,12 @@
               console.log("تم مشاهدة الإعلان بالكامل، مكافأة تلميح", data);
               setGames({ wordFreeHints: freeHints + 1 });
               setShowHintModal(false);
+              hapticImpact('success');
             },
             onError: (error) => {
               console.error("خطأ في عرض الإعلان", error);
               alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
+              hapticImpact('error');
             }
           });
         } else {
@@ -1208,6 +1249,7 @@
           setState({ balance: balance - 2 });
           setGames({ wordFreeHints: freeHints + 1 });
           setShowHintModal(false);
+          hapticImpact('heavy');
         }
       };
 
@@ -1232,7 +1274,10 @@
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 1rem 6rem', direction: 'rtl' }}>
           {/* Header */}
           <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <button onClick={() => setState({ currentTab: "home" })} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
+            <button onClick={() => {
+              setState({ currentTab: "home" });
+              hapticImpact('light');
+            }} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
               <Icons.ChevronLeft />
             </button>
             <div style={{ textAlign: 'center' }}>
@@ -1416,8 +1461,10 @@
       const handleTaskClick = (task) => {
         if (!task.completed) {
           window.open(task.link, '_blank');
+          hapticImpact('light');
           setTimeout(() => {
             completeTask(task.id);
+            hapticImpact('medium');
           }, 3000);
         }
       };
@@ -1456,11 +1503,13 @@
       const referralCode = useStore(s => s.referralCode);
       const referrals = useStore(s => s.referrals);
       
-      const inviteLink = `https://t.me/YourBotUsername?start=${referralCode}`;
+      // رابط البوت الصحيح (تم التعديل)
+      const inviteLink = `https://t.me/@PalestinePLT2_bot?start=${referralCode}`;
       
       const copyToClipboard = () => {
         navigator.clipboard.writeText(inviteLink);
         alert("تم نسخ الرابط!");
+        hapticImpact('light');
       };
       
       const shareLink = () => {
@@ -1470,6 +1519,7 @@
             text: 'انضم إلي واربح PT2!',
             url: inviteLink,
           });
+          hapticImpact('light');
         } else {
           copyToClipboard();
         }
@@ -1512,6 +1562,10 @@
 
       useEffect(() => {
         initializeStore();
+        if (tg) {
+          tg.ready();
+          tg.expand();
+        }
       }, []);
 
       if (showSplash) {
