@@ -7,6 +7,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- مكتبة إعلانات Adsgram الرسمية -->
+  <script src="https://cdn.adsgram.ai/js/adsgram.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -715,7 +717,7 @@
       );
     }
 
-    // ==================== CANDY GAME ====================
+    // ==================== CANDY GAME (FIXED AUTO-PLAY) ====================
     const COLORS = ["red", "blue", "green", "yellow", "orange"];
     const COLOR_STYLES = {
       red: "linear-gradient(135deg, #ef4444, #dc2626)",
@@ -779,10 +781,17 @@
       const [activeBooster, setActiveBooster] = useState(null);
       const [gameState, setGameState] = useState("playing");
       const [showReward, setShowReward] = useState(false);
+      const [isProcessingMatch, setIsProcessingMatch] = useState(false);
 
-      const checkMatches = useCallback(() => {
+      // دالة المطابقة مع منع التكرار التلقائي
+      const checkMatches = useCallback((fromUserAction = false) => {
+        // إذا كانت اللعبة منتهية أو لا توجد حركة من المستخدم فلا تفعل شيئًا
+        if (gameState !== "playing") return;
+        if (!fromUserAction && moves === 30 && score === 0) return;
+        
         const matches = findMatches(board);
         if (matches.length > 0) {
+          setIsProcessingMatch(true);
           const newBoard = board.map(row => row.map(cell => ({ ...cell })));
           matches.forEach(([i, j]) => { newBoard[i][j].matched = true; });
           setBoard(newBoard);
@@ -793,13 +802,17 @@
               row.map(cell => cell.matched ? { ...cell, color: COLORS[Math.floor(Math.random() * COLORS.length)], matched: false } : cell)
             );
             setBoard(afterRemove);
-            setTimeout(() => checkMatches(), 300);
-          }, 300);
+            setTimeout(() => {
+              setIsProcessingMatch(false);
+              checkMatches(true);
+            }, 150);
+          }, 250);
+        } else {
+          setIsProcessingMatch(false);
         }
-      }, [board]);
+      }, [board, gameState, moves, score]);
 
-      useEffect(() => { checkMatches(); }, []);
-
+      // التحقق من الفوز أو الخسارة
       useEffect(() => {
         if (score >= targetScore && gameState === "playing") {
           setGameState("won");
@@ -814,13 +827,14 @@
 
       const handleCellClick = (i, j) => {
         if (gameState !== "playing") return;
+        if (isProcessingMatch) return;
 
         if (activeBooster === "hammer") {
           const newBoard = board.map(row => row.map(cell => ({ ...cell })));
           newBoard[i][j].color = COLORS[Math.floor(Math.random() * COLORS.length)];
           setBoard(newBoard);
           setActiveBooster(null);
-          setTimeout(() => checkMatches(), 100);
+          setTimeout(() => checkMatches(true), 100);
           return;
         }
 
@@ -837,7 +851,7 @@
           setBoard(newBoard);
           setScore(s => s + 90);
           setActiveBooster(null);
-          setTimeout(() => checkMatches(), 100);
+          setTimeout(() => checkMatches(true), 100);
           return;
         }
 
@@ -858,7 +872,7 @@
             setBoard(newBoard);
             setSelected(null);
             setMoves(m => m - 1);
-            setTimeout(() => checkMatches(), 100);
+            setTimeout(() => checkMatches(true), 100);
           } else {
             const newBoard = board.map(row => row.map(cell => ({ ...cell, selected: false })));
             setBoard(newBoard);
@@ -880,16 +894,30 @@
         }
       };
 
+      // دالة مشاهدة الإعلان الحقيقية مع Adsgram
       const handleWatchAd = () => {
-        console.log("Adsgram ad triggered with ID: 28238");
-        setShowBoosterModal(false);
-        setGames({ candyFreeBoosters: 1 });
+        if (typeof window.adsgram !== 'undefined') {
+          const adController = window.adsgram.showAd({
+            blockId: "28238",
+            onReward: (data) => {
+              console.log("تم مشاهدة الإعلان بالكامل، مكافأة للمستخدم", data);
+              setGames({ candyFreeBoosters: freeBoosters + 1 });
+              setShowBoosterModal(false);
+            },
+            onError: (error) => {
+              console.error("خطأ في عرض الإعلان", error);
+              alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
+            }
+          });
+        } else {
+          alert("مكتبة الإعلانات لم تحمل بعد، تأكد من اتصالك بالإنترنت");
+        }
       };
 
       const handlePayTokens = () => {
         if (balance >= 3) {
           setState({ balance: balance - 3 });
-          setGames({ candyFreeBoosters: 1 });
+          setGames({ candyFreeBoosters: freeBoosters + 1 });
           setShowBoosterModal(false);
         }
       };
@@ -901,6 +929,7 @@
         setGameState("playing");
         setSelected(null);
         setActiveBooster(null);
+        setIsProcessingMatch(false);
       };
 
       return (
@@ -1029,7 +1058,7 @@
             </div>
           )}
 
-          {/* Booster Modal */}
+          {/* Booster Modal with Real Ads */}
           {showBoosterModal && (
             <div style={{
               position: 'fixed', inset: 0, zIndex: 50,
@@ -1154,16 +1183,30 @@
         }
       };
 
+      // دالة مشاهدة الإعلان الحقيقية للكلمات
       const handleWatchAd = () => {
-        console.log("Adsgram ad triggered with ID: 28238");
-        setShowHintModal(false);
-        setGames({ wordFreeHints: 1 });
+        if (typeof window.adsgram !== 'undefined') {
+          const adController = window.adsgram.showAd({
+            blockId: "28238",
+            onReward: (data) => {
+              console.log("تم مشاهدة الإعلان بالكامل، مكافأة تلميح", data);
+              setGames({ wordFreeHints: freeHints + 1 });
+              setShowHintModal(false);
+            },
+            onError: (error) => {
+              console.error("خطأ في عرض الإعلان", error);
+              alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
+            }
+          });
+        } else {
+          alert("مكتبة الإعلانات لم تحمل بعد، تأكد من اتصالك بالإنترنت");
+        }
       };
 
       const handlePayTokens = () => {
         if (balance >= 2) {
           setState({ balance: balance - 2 });
-          setGames({ wordFreeHints: 1 });
+          setGames({ wordFreeHints: freeHints + 1 });
           setShowHintModal(false);
         }
       };
@@ -1326,7 +1369,7 @@
             </div>
           )}
 
-          {/* Hint Modal */}
+          {/* Hint Modal with Real Ads */}
           {showHintModal && (
             <div style={{
               position: 'fixed', inset: 0, zIndex: 50,
@@ -1340,10 +1383,10 @@
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <button className="btn btn-primary btn-lg" onClick={handleWatchAd} style={{ width: '100%' }}>
-                    <Icons.Play /> <span style={{ marginRight: '0.5rem' }}>شاهد إعلان (اكشف حرف)</span>
+                    <Icons.Play /> <span style={{ marginRight: '0.5rem' }}>شاهد إعلان (+1 تلميح)</span>
                   </button>
                   <button className="btn btn-outline btn-lg" onClick={handlePayTokens} disabled={balance < 2} style={{ width: '100%', borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-                    <Icons.Coins /> <span style={{ marginRight: '0.5rem' }}>ادفع 2 PT2 (اكشف حرف)</span>
+                    <Icons.Coins /> <span style={{ marginRight: '0.5rem' }}>ادفع 2 PT2 (+1 تلميح)</span>
                   </button>
                 </div>
                 <button className="btn btn-ghost" onClick={() => setShowHintModal(false)} style={{ width: '100%', marginTop: '1rem' }}>إلغاء</button>
@@ -1365,359 +1408,129 @@
       );
     }
 
-    // ==================== TASKS TAB ====================
-    function TasksTab() {
-      const balance = useStore(s => s.balance);
+    // ==================== TASKS PAGE ====================
+    function TasksPage() {
       const tasks = useStore(s => s.tasks);
-      const dailyLoginClaimed = useStore(s => s.dailyLoginClaimed);
-      const lastDailyLogin = useStore(s => s.lastDailyLogin);
-
-      const [verifyingTaskId, setVerifyingTaskId] = useState(null);
-      const [showReward, setShowReward] = useState(false);
-      const [rewardAmount, setRewardAmount] = useState(0);
-
-      const canClaimDaily = !dailyLoginClaimed || (lastDailyLogin && Date.now() - lastDailyLogin > 24 * 60 * 60 * 1000);
-
-      const handleVerify = async (task) => {
-        setVerifyingTaskId(task.id);
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        completeTask(task.id);
-        setVerifyingTaskId(null);
-        setRewardAmount(task.reward);
-        setShowReward(true);
-        setTimeout(() => setShowReward(false), 2000);
-      };
-
-      const claimDailyLogin = () => {
-        if (!canClaimDaily) return;
-        setState({ balance: balance + 5, dailyLoginClaimed: true, lastDailyLogin: Date.now() });
-        setRewardAmount(5);
-        setShowReward(true);
-        setTimeout(() => setShowReward(false), 2000);
+      const balance = useStore(s => s.balance);
+      
+      const handleTaskClick = (task) => {
+        if (!task.completed) {
+          window.open(task.link, '_blank');
+          setTimeout(() => {
+            completeTask(task.id);
+          }, 3000);
+        }
       };
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem 6rem' }}>
+        <div style={{ padding: '1rem 1rem 6rem', maxWidth: '28rem', margin: '0 auto' }}>
           <div style={{ marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.25rem' }}>المهام</h1>
-            <p style={{ color: 'var(--muted-foreground)' }}>أكمل المهام لكسب PT2</p>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)' }}>المهام</h1>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>أكمل المهام واربح PT2</p>
           </div>
 
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
-              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>{balance.toFixed(2)}</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>الرصيد الكلي</p>
-            </div>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
-              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>{tasks.filter(t => t.completed).length}/{tasks.length}</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>مكتملة</p>
-            </div>
-          </div>
-
-          {/* Daily Login */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--primary)' }}><Icons.Calendar /></span>
-              المكافأة اليومية
-            </h2>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', opacity: canClaimDaily ? 1 : 0.6 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontWeight: 600, color: 'var(--foreground)' }}>تسجيل دخول يومي</h3>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>اطلب مرة كل 24 ساعة</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}>
-                    <span style={{ color: 'var(--accent)' }}><Icons.Gift /></span>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--accent)' }}>+5 PT2</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {tasks.map(task => (
+              <div key={task.id} className="glass" style={{ borderRadius: '1rem', padding: '1rem', cursor: task.completed ? 'default' : 'pointer' }} onClick={() => handleTaskClick(task)}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: task.completed ? 'var(--primary)' : 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {task.completed ? <Icons.Check /> : <Icons.ExternalLink />}
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 'bold', color: 'var(--foreground)' }}>{task.title}</p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{task.description}</p>
+                    </div>
                   </div>
+                  <div style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{task.reward}</div>
                 </div>
-                <button
-                  className={`btn ${canClaimDaily ? 'btn-accent animate-pulse' : 'btn-outline'}`}
-                  onClick={claimDailyLogin}
-                  disabled={!canClaimDaily}
-                >
-                  {canClaimDaily ? "اطلب" : "تم الطلب"}
-                </button>
               </div>
-            </div>
+            ))}
           </div>
-
-          {/* Social Tasks */}
-          <div>
-            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--primary)' }}><Icons.ExternalLink /></span>
-              المهام الاجتماعية
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {tasks.map(task => (
-                <div key={task.id} className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', opacity: task.completed ? 0.6 : 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontWeight: 600, color: 'var(--foreground)' }}>{task.title}</h3>
-                      <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>{task.description}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}>
-                        <span style={{ color: 'var(--accent)' }}><Icons.Coins /></span>
-                        <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--accent)' }}>+{task.reward} PT2</span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {task.completed ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary)' }}>
-                          <Icons.Check />
-                          <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>تم</span>
-                        </div>
-                      ) : (
-                        <>
-                          <button
-                            className="btn btn-outline btn-sm"
-                            onClick={() => window.open(task.link, "_blank")}
-                            style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
-                          >
-                            <Icons.ExternalLink /> <span style={{ marginRight: '0.25rem' }}>انضم</span>
-                          </button>
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleVerify(task)}
-                            disabled={verifyingTaskId === task.id}
-                          >
-                            {verifyingTaskId === task.id ? <Icons.Loader /> : "تحقق"}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Reward */}
-          {showReward && (
-            <div style={{
-              position: 'fixed', top: '33%', left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-              background: 'var(--accent)', color: 'var(--accent-foreground)',
-              padding: '0.75rem 1.5rem', borderRadius: '9999px', fontWeight: 'bold', fontSize: '1.25rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-            }}>
-              +{rewardAmount} PT2
-            </div>
-          )}
         </div>
       );
     }
 
-    // ==================== REFERRAL TAB ====================
-    function ReferralTab() {
-      const balance = useStore(s => s.balance);
+    // ==================== FRIENDS PAGE ====================
+    function FriendsPage() {
       const referralCode = useStore(s => s.referralCode);
       const referrals = useStore(s => s.referrals);
-
-      const [copied, setCopied] = useState(false);
-      const [showSimulateReward, setShowSimulateReward] = useState(false);
-
-      const referralLink = `https://t.me/PalestineToken2Bot?start=${referralCode}`;
-
-      const copyToClipboard = async () => {
-        try {
-          await navigator.clipboard.writeText(referralLink);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } catch (e) {
-          const input = document.createElement("input");
-          input.value = referralLink;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand("copy");
-          document.body.removeChild(input);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
+      
+      const inviteLink = `https://t.me/YourBotUsername?start=${referralCode}`;
+      
+      const copyToClipboard = () => {
+        navigator.clipboard.writeText(inviteLink);
+        alert("تم نسخ الرابط!");
+      };
+      
+      const shareLink = () => {
+        if (navigator.share) {
+          navigator.share({
+            title: 'Palestine Token2',
+            text: 'انضم إلي واربح PT2!',
+            url: inviteLink,
+          });
+        } else {
+          copyToClipboard();
         }
       };
 
-      const shareToTelegram = () => {
-        const text = encodeURIComponent(`انضم إلى Palestine Token2 واكسب توكنات PT2! استخدم رابط الإحالة الخاص بي: ${referralLink}`);
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`, "_blank");
-      };
-
-      const simulateReferral = () => {
-        setState({ referrals: referrals + 1, balance: balance + 10 });
-        setShowSimulateReward(true);
-        setTimeout(() => setShowSimulateReward(false), 2000);
-      };
-
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem 6rem' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.25rem' }}>ادعُ أصدقاءك</h1>
-            <p style={{ color: 'var(--muted-foreground)' }}>اكسب 10 PT2 لكل صديق ينضم</p>
+        <div style={{ padding: '1rem 1rem 6rem', maxWidth: '28rem', margin: '0 auto' }}>
+          <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)' }}>الأصدقاء</h1>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>ادعُ أصدقاءك واربح المكافآت</p>
           </div>
 
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
-              <div style={{
-                width: '3rem', height: '3rem', borderRadius: '50%',
-                background: 'rgba(16, 185, 129, 0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 0.5rem', color: 'var(--primary)'
-              }}>
-                <Icons.Users />
-              </div>
-              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{referrals}</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>الأصدقاء المدعوون</p>
-            </div>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
-              <div style={{
-                width: '3rem', height: '3rem', borderRadius: '50%',
-                background: 'rgba(245, 158, 11, 0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 0.5rem', color: 'var(--accent)'
-              }}>
-                <Icons.Coins />
-              </div>
-              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>{referrals * 10}</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>PT2 مكتسبة</p>
-            </div>
+          <div className="glass" style={{ borderRadius: '1rem', padding: '1.5rem', textAlign: 'center', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>عدد الإحالات</p>
+            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>{referrals}</p>
           </div>
 
-          {/* Referral Link */}
-          <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.75rem' }}>رابط الإحالة الخاص بك</h3>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input
-                type="text"
-                readOnly
-                value={referralLink}
-                className="input"
-                style={{ fontSize: '0.75rem', fontFamily: 'monospace', direction: 'ltr' }}
-              />
-              <button
-                className="btn btn-outline"
-                onClick={copyToClipboard}
-                style={{ flexShrink: 0, borderColor: copied ? 'var(--primary)' : 'var(--border)', color: copied ? 'var(--primary)' : 'var(--foreground)' }}
-              >
-                {copied ? <Icons.Check /> : <Icons.Copy />}
-              </button>
+          <div className="glass" style={{ borderRadius: '1rem', padding: '1.5rem', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: '0.5rem' }}>كود الإحالة الخاص بك</p>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input type="text" value={referralCode} readOnly className="input" style={{ flex: 1 }} />
+              <button className="btn btn-outline" onClick={copyToClipboard}><Icons.Copy /></button>
             </div>
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={shareLink}>
+              <Icons.Share /> <span style={{ marginRight: '0.5rem' }}>دعوة الأصدقاء</span>
+            </button>
           </div>
 
-          {/* Share Button */}
-          <button className="btn btn-primary btn-lg" onClick={shareToTelegram} style={{ width: '100%', marginBottom: '1.5rem' }}>
-            <Icons.Share /> <span style={{ marginRight: '0.5rem' }}>شارك على تيليجرام</span>
-          </button>
-
-          {/* How it works */}
-          <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: '1rem' }}>كيف يعمل</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{
-                  width: '2rem', height: '2rem', borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--primary)'
-                }}>1</div>
-                <div>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--foreground)' }}>شارك رابطك</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>أرسل رابط الإحالة الفريد لأصدقائك</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{
-                  width: '2rem', height: '2rem', borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--primary)'
-                }}>2</div>
-                <div>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--foreground)' }}>الصديق ينضم</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>صديقك يفتح البوت باستخدام رابطك</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{
-                  width: '2rem', height: '2rem', borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(245, 158, 11, 0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--accent)'
-                }}><Icons.Gift /></div>
-                <div>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--foreground)' }}>احصل على المكافأة</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>اكسب 10 PT2 لكل إحالة ناجحة</p>
-                </div>
-              </div>
-            </div>
+          <div className="glass" style={{ borderRadius: '1rem', padding: '1rem' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--accent)', textAlign: 'center' }}>كل صديق ينضم يمنحك 5 PT2!</p>
           </div>
-
-          {/* Simulate */}
-          <button className="btn btn-outline" onClick={simulateReferral} style={{ borderStyle: 'dashed', color: 'var(--muted-foreground)' }}>
-            محاكاة إحالة (تجريبي)
-          </button>
-
-          {/* Reward */}
-          {showSimulateReward && (
-            <div style={{
-              position: 'fixed', top: '33%', left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-              background: 'var(--accent)', color: 'var(--accent-foreground)',
-              padding: '0.75rem 1.5rem', borderRadius: '9999px', fontWeight: 'bold', fontSize: '1.25rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-            }}>
-              +10 PT2
-            </div>
-          )}
         </div>
       );
     }
 
     // ==================== MAIN APP ====================
     function App() {
-      const [isInitialized, setIsInitialized] = useState(false);
-      const showSplash = useStore(s => s.showSplash);
+      const [showSplash, setShowSplash] = useState(true);
       const currentTab = useStore(s => s.currentTab);
 
       useEffect(() => {
         initializeStore();
-        setIsInitialized(true);
       }, []);
 
-      if (!isInitialized) {
-        return (
-          <div style={{
-            minHeight: '100vh', background: 'var(--background)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <div style={{
-              width: '2rem', height: '2rem',
-              border: '2px solid var(--primary)', borderTopColor: 'transparent',
-              borderRadius: '50%'
-            }} className="animate-spin" />
-          </div>
-        );
+      if (showSplash) {
+        return <SplashScreen onComplete={() => setShowSplash(false)} />;
       }
 
       return (
-        <main style={{ minHeight: '100vh', background: 'var(--background)' }}>
-          {showSplash && <SplashScreen onComplete={() => setState({ showSplash: false })} />}
-
-          {!showSplash && (
-            <>
-              <div style={{ maxWidth: '28rem', margin: '0 auto' }}>
-                {currentTab === "home" && <MiningDashboard />}
-                {currentTab === "candy" && <CandyGame />}
-                {currentTab === "words" && <WordGame />}
-                {currentTab === "tasks" && <TasksTab />}
-                {currentTab === "friends" && <ReferralTab />}
-              </div>
-              <BottomNav />
-            </>
-          )}
-        </main>
+        <div style={{ minHeight: '100vh', paddingBottom: '64px' }}>
+          {currentTab === "home" && <MiningDashboard />}
+          {currentTab === "candy" && <CandyGame />}
+          {currentTab === "words" && <WordGame />}
+          {currentTab === "tasks" && <TasksPage />}
+          {currentTab === "friends" && <FriendsPage />}
+          <BottomNav />
+        </div>
       );
     }
 
-    // Render
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   </script>
 </body>
 </html>
