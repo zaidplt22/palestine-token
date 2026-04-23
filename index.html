@@ -4,25 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Palestine Token2 (PT2)</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- مكتبة إعلانات Adsgram الرسمية -->
-  <script src="https://cdn.adsgram.ai/js/adsgram.js"></script>
-  <!-- مكتبة تلغرام WebApp لإضافة الاهتزاز والتأثيرات -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     :root {
       --background: #050505;
       --foreground: #fafafa;
-      --card: #121212;
+      --card: rgba(18, 18, 18, 0.7);
       --card-foreground: #fafafa;
       --primary: #10b981;
       --primary-foreground: #050505;
@@ -33,28 +31,37 @@
       --accent: #f59e0b;
       --accent-foreground: #050505;
       --destructive: #ef4444;
-      --border: #333333;
+      --border: rgba(255, 255, 255, 0.1);
       --ring: #10b981;
     }
 
     body {
       font-family: 'Cairo', sans-serif;
-      background-color: var(--background);
+      background: radial-gradient(circle at top, #0a0f0d, #030303);
       color: var(--foreground);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
     .glass {
-      background: rgba(18, 18, 18, 0.7);
+      background: var(--card);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+    }
+
+    .glass-sm {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
     }
 
     @keyframes pulse-glow {
       0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
-      50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.6); }
+      50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.3); }
     }
 
     @keyframes float {
@@ -68,8 +75,8 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
     }
 
     @keyframes shake {
@@ -78,23 +85,56 @@
       75% { transform: translateX(10px); }
     }
 
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    @keyframes toast-out {
+      from { opacity: 1; transform: translate(-50%, 0); }
+      to { opacity: 0; transform: translate(-50%, -20px); }
+    }
+
     .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
     .animate-float { animation: float 3s ease-in-out infinite; }
     .animate-spin { animation: spin 1s linear infinite; }
     .animate-pulse { animation: pulse 2s ease-in-out infinite; }
     .animate-shake { animation: shake 0.5s ease-in-out; }
+    .animate-slide-up { animation: slideUp 0.3s ease-out; }
+    .animate-scale-in { animation: scaleIn 0.3s ease-out; }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem 1rem;
-      border-radius: 0.75rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
       font-family: inherit;
+      user-select: none;
     }
 
     .btn:active {
@@ -102,16 +142,18 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), rgba(16, 185, 129, 0.8));
+      background: linear-gradient(135deg, var(--primary), #059669);
       color: var(--primary-foreground);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
     }
 
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary:hover { opacity: 0.95; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .btn-accent {
-      background: linear-gradient(135deg, var(--accent), rgba(245, 158, 11, 0.8));
+      background: linear-gradient(135deg, var(--accent), #d97706);
       color: var(--accent-foreground);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
     }
 
     .btn-outline {
@@ -120,34 +162,37 @@
       color: var(--foreground);
     }
 
-    .btn-outline:hover { background: var(--secondary); }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.05); }
 
     .btn-ghost {
       background: transparent;
       color: var(--muted-foreground);
     }
 
-    .btn-ghost:hover { background: var(--secondary); }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.05); }
 
     .btn-lg {
-      padding: 0.75rem 1.5rem;
+      padding: 0.875rem 1.75rem;
       font-size: 1.1rem;
+      border-radius: 20px;
     }
 
     .btn-sm {
-      padding: 0.375rem 0.75rem;
+      padding: 0.5rem 1rem;
       font-size: 0.875rem;
+      border-radius: 12px;
     }
 
     .input {
       width: 100%;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.5rem;
+      padding: 0.625rem 1rem;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      background: var(--secondary);
+      background: rgba(26, 26, 26, 0.8);
       color: var(--foreground);
       font-family: inherit;
       font-size: 1rem;
+      transition: border-color 0.2s;
     }
 
     .input:focus {
@@ -155,24 +200,128 @@
       border-color: var(--primary);
     }
 
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      padding: 0.875rem 1.5rem;
+      border-radius: 16px;
+      font-weight: 600;
+      animation: toast-in 0.3s ease-out;
+    }
+
+    .toast.hiding {
+      animation: toast-out 0.3s ease-out forwards;
+    }
+
+    .toast-success {
+      background: linear-gradient(135deg, var(--primary), #059669);
+      color: var(--primary-foreground);
+      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+    }
+
+    .toast-reward {
+      background: linear-gradient(135deg, var(--accent), #d97706);
+      color: var(--accent-foreground);
+      box-shadow: 0 8px 32px rgba(245, 158, 11, 0.4);
+    }
+
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confetti 3s ease-out forwards;
+      pointer-events: none;
+      z-index: 200;
+    }
+
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); }
     ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.5); border-radius: 2px; }
+
+    .progress-ring {
+      transition: stroke-dashoffset 1s ease-out;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      animation: scaleIn 0.2s ease-out;
+    }
+
+    .modal-content {
+      animation: slideUp 0.3s ease-out;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useCallback, useMemo, useSyncExternalStore, createContext, useContext } = React;
+    const { useState, useEffect, useCallback, useMemo, useSyncExternalStore, useRef } = React;
 
-    // إضافة تأثير الاهتزاز من تلغرام (Haptic Feedback)
-    const tg = window.Telegram?.WebApp;
-    const hapticImpact = (style = 'light') => {
-      if (tg && tg.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred(style);
-      }
+    // ==================== HAPTIC FEEDBACK ====================
+    const haptic = (style = 'light') => {
+      try {
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred(style);
+        }
+      } catch (e) {}
     };
+
+    // ==================== TOAST SYSTEM ====================
+    let toastTimeout = null;
+    let setToastState = null;
+
+    function showToast(message, type = 'success', duration = 2500) {
+      if (setToastState) {
+        setToastState({ message, type, visible: true, hiding: false });
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          setToastState(prev => ({ ...prev, hiding: true }));
+          setTimeout(() => {
+            setToastState({ message: '', type: 'success', visible: false, hiding: false });
+          }, 300);
+        }, duration);
+      }
+    }
+
+    function Toast({ toast }) {
+      if (!toast.visible) return null;
+      return (
+        <div className={`toast toast-${toast.type} ${toast.hiding ? 'hiding' : ''}`}>
+          {toast.message}
+        </div>
+      );
+    }
+
+    // ==================== CONFETTI ====================
+    function createConfetti() {
+      const colors = ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899'];
+      const container = document.body;
+      
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti-piece';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.bottom = '-10px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+        container.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    }
 
     // ==================== ARABIC WORD PUZZLES (70 LEVELS) ====================
     const ARABIC_PUZZLES = [
@@ -358,30 +507,31 @@
       return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     }
 
-    // ==================== ICONS ====================
+    // ==================== SVG ICONS ====================
     const Icons = {
-      Home: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-      Gamepad: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>,
-      Type: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>,
-      List: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
-      Users: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-      Coins: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="8" cy="8" r="7"/><path d="M18.09 10.37A7 7 0 1 1 10.37 18.09"/><path d="M7 6h2v4"/><path d="M16 14h2v4"/></svg>,
-      Zap: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-      Clock: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-      ChevronLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>,
-      Hammer: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="M20 7l-1.5-1.5"/><path d="M15 12l-2-2"/><path d="M12 9l-3-3"/><path d="M9 6L6 3"/></svg>,
-      Bomb: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="13" r="9"/><path d="M14.35 4.65L16.3 2.7a1 1 0 0 1 1.4 0l.6.6a1 1 0 0 1 0 1.4l-1.95 1.95"/><path d="M22 2L18 6"/></svg>,
-      Plus: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-      Play: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
-      Lightbulb: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>,
-      RotateCcw: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 2v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg>,
-      ExternalLink: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
-      Check: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-      Gift: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
-      Calendar: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-      Copy: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
-      Share: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
-      Loader: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>,
+      Home: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+      Gamepad: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>,
+      Type: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>,
+      List: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+      Users: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+      Coins: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h2v4"/><path d="M16 14h2v4"/></svg>,
+      Zap: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+      Clock: () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+      ChevronLeft: () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
+      Hammer: () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="M20 7l-1.5-1.5"/><path d="M15 12l-2-2"/><path d="M12 9l-3-3"/><path d="M9 6L6 3"/></svg>,
+      Bomb: () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="13" r="9"/><path d="M14.35 4.65L16.3 2.7a1 1 0 0 1 1.4 0l.6.6a1 1 0 0 1 0 1.4l-1.95 1.95"/><path d="M22 2L18 6"/></svg>,
+      Plus: () => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+      Play: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
+      Lightbulb: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>,
+      RotateCcw: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg>,
+      ExternalLink: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+      Check: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+      Gift: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
+      Calendar: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+      Copy: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+      Share: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
+      Loader: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>,
+      Star: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
     };
 
     // ==================== SPLASH SCREEN ====================
@@ -410,54 +560,56 @@
         <div style={{
           position: 'fixed', inset: 0, zIndex: 50,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          background: 'var(--background)'
+          background: 'radial-gradient(circle at top, #0a0f0d, #030303)'
         }}>
           <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
             <div style={{
-              position: 'absolute', top: '25%', left: '25%', width: '16rem', height: '16rem',
-              borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', filter: 'blur(48px)'
+              position: 'absolute', top: '20%', left: '20%', width: '20rem', height: '20rem',
+              borderRadius: '50%', background: 'rgba(16, 185, 129, 0.08)', filter: 'blur(80px)'
             }} className="animate-pulse" />
             <div style={{
-              position: 'absolute', bottom: '25%', right: '25%', width: '16rem', height: '16rem',
-              borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', filter: 'blur(48px)'
+              position: 'absolute', bottom: '20%', right: '20%', width: '20rem', height: '20rem',
+              borderRadius: '50%', background: 'rgba(245, 158, 11, 0.08)', filter: 'blur(80px)'
             }} className="animate-pulse" />
           </div>
 
           <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{
-              position: 'relative', width: '8rem', height: '8rem', marginBottom: '1.5rem'
-            }} className="animate-float">
+            <div style={{ position: 'relative', width: '9rem', height: '9rem', marginBottom: '2rem' }} className="animate-float">
               <div style={{
                 position: 'absolute', inset: 0, borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--primary), rgba(16, 185, 129, 0.6))',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                background: 'linear-gradient(135deg, var(--primary), #059669)',
+                boxShadow: '0 0 60px rgba(16, 185, 129, 0.4)'
               }} />
               <div style={{
-                position: 'absolute', inset: '0.5rem', borderRadius: '50%',
-                background: 'var(--background)',
+                position: 'absolute', inset: '6px', borderRadius: '50%',
+                background: 'radial-gradient(circle at top, #0a0f0d, #030303)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-                <span style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>PT2</span>
+                <span style={{ fontSize: '2.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>PT2</span>
               </div>
               <div style={{ position: 'absolute', inset: 0, borderRadius: '50%' }} className="animate-pulse-glow" />
             </div>
 
-            <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.5rem', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.5rem', textAlign: 'center' }}>
               Palestine Token2
             </h1>
-            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginBottom: '2rem' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '1rem', marginBottom: '2.5rem' }}>
               Mine, Play, Earn
             </p>
 
             <div style={{
-              width: '200px', height: '4px', background: 'var(--secondary)', borderRadius: '2px', overflow: 'hidden'
+              width: '220px', height: '6px', background: 'rgba(38, 38, 38, 0.8)', borderRadius: '3px', overflow: 'hidden'
             }}>
               <div style={{
                 height: '100%', width: `${progress}%`,
                 background: 'linear-gradient(90deg, var(--primary), var(--accent))',
-                transition: 'width 0.1s'
+                transition: 'width 0.1s',
+                borderRadius: '3px'
               }} />
             </div>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginTop: '0.75rem' }}>
+              {Math.round(progress)}%
+            </p>
           </div>
         </div>
       );
@@ -474,14 +626,20 @@
         { id: "friends", label: "الأصدقاء", icon: Icons.Users },
       ];
 
+      const handleTabClick = (tabId) => {
+        haptic('light');
+        setState({ currentTab: tabId });
+      };
+
       return (
         <nav className="glass" style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-          borderTop: '1px solid var(--border)'
+          borderRadius: '28px 28px 0 0',
+          borderBottom: 'none'
         }}>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-around',
-            height: '64px', maxWidth: '28rem', margin: '0 auto', padding: '0 0.5rem'
+            height: '72px', maxWidth: '30rem', margin: '0 auto', padding: '0 0.5rem'
           }}>
             {tabs.map(tab => {
               const Icon = tab.icon;
@@ -489,29 +647,31 @@
               return (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    setState({ currentTab: tab.id });
-                    hapticImpact('light');
-                  }}
+                  onClick={() => handleTabClick(tab.id)}
                   style={{
                     position: 'relative', display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center', flex: 1, height: '100%',
-                    background: 'none', border: 'none', cursor: 'pointer'
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    transition: 'transform 0.2s'
                   }}
                 >
                   {isActive && (
                     <div style={{
-                      position: 'absolute', top: 0, left: '0.5rem', right: '0.5rem',
-                      height: '2px', background: 'var(--primary)', borderRadius: '1px'
+                      position: 'absolute', top: 0, left: '25%', right: '25%',
+                      height: '3px', background: 'linear-gradient(90deg, var(--primary), #059669)', borderRadius: '2px'
                     }} />
                   )}
-                  <div style={{ color: isActive ? 'var(--primary)' : 'var(--muted-foreground)' }}>
+                  <div style={{ 
+                    color: isActive ? 'var(--primary)' : 'var(--muted-foreground)',
+                    transition: 'color 0.2s, transform 0.2s',
+                    transform: isActive ? 'scale(1.1)' : 'scale(1)'
+                  }}>
                     <Icon />
                   </div>
                   <span style={{
-                    fontSize: '0.75rem', marginTop: '0.25rem',
+                    fontSize: '0.7rem', marginTop: '0.375rem',
                     color: isActive ? 'var(--primary)' : 'var(--muted-foreground)',
-                    fontWeight: isActive ? 600 : 400
+                    fontWeight: isActive ? 700 : 500
                   }}>
                     {tab.label}
                   </span>
@@ -539,7 +699,6 @@
       const [captchaError, setCaptchaError] = useState(false);
       const [timeLeft, setTimeLeft] = useState("24:00:00");
       const [localProgress, setLocalProgress] = useState(0);
-      const [showReward, setShowReward] = useState(false);
 
       const isMining = miningStartTime !== null;
       const canClaim = localProgress >= 100;
@@ -571,29 +730,32 @@
       }, [miningStartTime]);
 
       const handleCaptchaSubmit = () => {
+        haptic('light');
         if (parseInt(captchaInput) === captcha.answer) {
           setState({ captchaSolved: true, captchaRequired: false });
           setCaptchaError(false);
-          hapticImpact('success');
+          haptic('medium');
+          showToast('تم التحقق بنجاح!', 'success');
         } else {
           setCaptchaError(true);
+          haptic('heavy');
           const a = Math.floor(Math.random() * 10) + 1;
           const b = Math.floor(Math.random() * 10) + 1;
           setCaptcha({ question: `${a} + ${b} = ?`, answer: a + b });
           setCaptchaInput("");
-          hapticImpact('error');
         }
       };
 
       const startMining = () => {
+        haptic('medium');
         setState({ miningStartTime: Date.now(), miningProgress: 0, dailyMined: 0 });
-        hapticImpact('medium');
+        showToast('بدأ التعدين!', 'success');
       };
 
       const claimReward = () => {
         if (!canClaim) return;
-        setShowReward(true);
-        setTimeout(() => setShowReward(false), 2000);
+        haptic('heavy');
+        showToast('+20 PT2', 'reward');
         const a = Math.floor(Math.random() * 10) + 1;
         const b = Math.floor(Math.random() * 10) + 1;
         setState({
@@ -607,28 +769,28 @@
         });
         setCaptcha({ question: `${a} + ${b} = ?`, answer: a + b });
         setCaptchaInput("");
-        hapticImpact('heavy');
       };
 
+      const circumference = 2 * Math.PI * 118;
+      const strokeDashoffset = circumference * (1 - localProgress / 100);
+
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem 1rem 6rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem 1rem 7rem' }} className="animate-slide-up">
           {/* Header */}
           <div style={{ width: '100%', maxWidth: '28rem', marginBottom: '2rem' }}>
-            <div className="glass" style={{
-              borderRadius: '1rem', padding: '1rem',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="glass" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{
-                  width: '2.5rem', height: '2.5rem', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--primary), rgba(16, 185, 129, 0.6))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  width: '3rem', height: '3rem', borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--primary), #059669)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
                 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--primary-foreground)' }}>PT2</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--primary-foreground)' }}>PT2</span>
                 </div>
                 <div>
                   <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>الرصيد</p>
-                  <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent)' }}>{balance.toFixed(2)} PT2</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>{balance.toFixed(2)} PT2</p>
                 </div>
               </div>
               <div style={{ color: 'var(--accent)' }}><Icons.Coins /></div>
@@ -636,19 +798,19 @@
           </div>
 
           {/* Mining Circle */}
-          <div style={{ position: 'relative', width: '16rem', height: '16rem', marginBottom: '2rem' }}>
-            {isMining && <div style={{ position: 'absolute', inset: 0, borderRadius: '50%' }} className="animate-pulse-glow" />}
+          <div style={{ position: 'relative', width: '17rem', height: '17rem', marginBottom: '2rem' }}>
+            {isMining && <div style={{ position: 'absolute', inset: '-8px', borderRadius: '50%' }} className="animate-pulse-glow" />}
             
             <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
-              <circle cx="128" cy="128" r="118" fill="none" stroke="var(--secondary)" strokeWidth="8" />
+              <circle cx="136" cy="136" r="118" fill="none" stroke="rgba(38, 38, 38, 0.5)" strokeWidth="10" />
               <circle
-                cx="128" cy="128" r="118" fill="none" stroke="url(#gradient)" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray={2 * Math.PI * 118}
-                strokeDashoffset={2 * Math.PI * 118 * (1 - localProgress / 100)}
-                style={{ transition: 'all 1s' }}
+                cx="136" cy="136" r="118" fill="none" stroke="url(#progressGradient)" strokeWidth="10" strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                className="progress-ring"
               />
               <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="var(--primary)" />
                   <stop offset="100%" stopColor="var(--accent)" />
                 </linearGradient>
@@ -656,13 +818,13 @@
             </svg>
 
             <div className="glass" style={{
-              position: 'absolute', inset: '2rem', borderRadius: '50%',
+              position: 'absolute', inset: '1.75rem', borderRadius: '50%',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
             }}>
               {!captchaSolved && captchaRequired && !isMining ? (
                 <div style={{ textAlign: 'center', padding: '0 1rem' }}>
                   <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: '0.5rem' }}>حل للبدء</p>
-                  <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.75rem' }}>{captcha.question}</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '1rem' }}>{captcha.question}</p>
                   <input
                     type="number"
                     value={captchaInput}
@@ -670,7 +832,7 @@
                     onKeyDown={(e) => e.key === "Enter" && handleCaptchaSubmit()}
                     className="input"
                     style={{
-                      width: '5rem', textAlign: 'center', marginBottom: '0.5rem',
+                      width: '5rem', textAlign: 'center', marginBottom: '0.75rem',
                       borderColor: captchaError ? 'var(--destructive)' : 'var(--border)'
                     }}
                     placeholder="?"
@@ -681,15 +843,33 @@
               ) : (
                 <>
                   <div style={{ color: isMining ? 'var(--primary)' : 'var(--muted-foreground)', marginBottom: '0.5rem' }}><Icons.Clock /></div>
-                  <p style={{ fontSize: '1.875rem', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>{timeLeft}</p>
+                  <p style={{ fontSize: '2.25rem', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--foreground)' }}>{timeLeft}</p>
                   <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>
                     {canClaim ? "جاهز للسحب!" : isMining ? "جاري التعدين..." : "ابدأ التعدين"}
                   </p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '0.5rem' }}>+20 PT2/يوم</p>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--accent)', marginTop: '0.5rem', fontWeight: 600 }}>+20 PT2/يوم</p>
                 </>
               )}
             </div>
           </div>
+
+          {/* Progress Bar */}
+          {isMining && (
+            <div style={{ width: '100%', maxWidth: '20rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>التقدم</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600 }}>{localProgress.toFixed(1)}%</span>
+              </div>
+              <div style={{ height: '8px', background: 'rgba(38, 38, 38, 0.8)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', width: `${localProgress}%`,
+                  background: 'linear-gradient(90deg, var(--primary), var(--accent))',
+                  borderRadius: '4px',
+                  transition: 'width 1s ease-out'
+                }} />
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           {captchaSolved && !isMining && (
@@ -705,40 +885,28 @@
           )}
 
           {isMining && !canClaim && (
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', background: 'var(--primary)' }} className="animate-pulse" />
+            <div className="glass-sm" style={{ padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '0.625rem', height: '0.625rem', borderRadius: '50%', background: 'var(--primary)' }} className="animate-pulse" />
               <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>التعدين قيد التشغيل</span>
-            </div>
-          )}
-
-          {/* Reward Animation */}
-          {showReward && (
-            <div style={{
-              position: 'fixed', top: '33%', left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-              background: 'var(--accent)', color: 'var(--accent-foreground)',
-              padding: '0.75rem 1.5rem', borderRadius: '9999px', fontWeight: 'bold', fontSize: '1.25rem',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-            }}>
-              +20 PT2
             </div>
           )}
 
           {/* Stats */}
           <div style={{ width: '100%', maxWidth: '28rem', marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
-              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>{localProgress.toFixed(1)}%</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>التقدم</p>
+            <div className="glass" style={{ padding: '1.25rem', textAlign: 'center' }}>
+              <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--primary)' }}>{localProgress.toFixed(1)}%</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>التقدم</p>
             </div>
-            <div className="glass" style={{ borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
-              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>20</p>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>PT2/يوم</p>
+            <div className="glass" style={{ padding: '1.25rem', textAlign: 'center' }}>
+              <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--accent)' }}>20</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>PT2/يوم</p>
             </div>
           </div>
         </div>
       );
     }
 
-    // ==================== CANDY GAME (FIXED AUTO-PLAY) ====================
+    // ==================== CANDY GAME (FIXED AUTO-PLAY BUG) ====================
     const COLORS = ["red", "blue", "green", "yellow", "orange"];
     const COLOR_STYLES = {
       red: "linear-gradient(135deg, #ef4444, #dc2626)",
@@ -797,61 +965,53 @@
       const [selected, setSelected] = useState(null);
       const [score, setScore] = useState(0);
       const [moves, setMoves] = useState(30);
+      const [userHasActed, setUserHasActed] = useState(false);
       const targetScore = level * 500;
       const [showBoosterModal, setShowBoosterModal] = useState(false);
       const [activeBooster, setActiveBooster] = useState(null);
       const [gameState, setGameState] = useState("playing");
-      const [showReward, setShowReward] = useState(false);
-      const [isProcessingMatch, setIsProcessingMatch] = useState(false);
 
-      // دالة المطابقة مع منع التكرار التلقائي (تم إصلاحها)
+      // FIX: Only check matches after user action
       const checkMatches = useCallback((fromUserAction = false) => {
-        // إذا كانت اللعبة منتهية أو لا توجد حركة من المستخدم فلا تفعل شيئًا
-        if (gameState !== "playing") return;
-        if (!fromUserAction && moves === 30 && score === 0) return;
-        
+        // Prevent auto-play on initial load
+        if (!fromUserAction && !userHasActed) return;
+
         const matches = findMatches(board);
         if (matches.length > 0) {
-          setIsProcessingMatch(true);
           const newBoard = board.map(row => row.map(cell => ({ ...cell })));
           matches.forEach(([i, j]) => { newBoard[i][j].matched = true; });
           setBoard(newBoard);
           setScore(s => s + matches.length * 10);
+          haptic('light');
 
           setTimeout(() => {
             const afterRemove = newBoard.map(row =>
               row.map(cell => cell.matched ? { ...cell, color: COLORS[Math.floor(Math.random() * COLORS.length)], matched: false } : cell)
             );
             setBoard(afterRemove);
-            setTimeout(() => {
-              setIsProcessingMatch(false);
-              checkMatches(true);
-            }, 150);
-          }, 250);
-        } else {
-          setIsProcessingMatch(false);
+            setTimeout(() => checkMatches(true), 300);
+          }, 300);
         }
-      }, [board, gameState, moves, score]);
+      }, [board, userHasActed]);
 
-      // التحقق من الفوز أو الخسارة
       useEffect(() => {
         if (score >= targetScore && gameState === "playing") {
           setGameState("won");
-          setShowReward(true);
+          haptic('heavy');
+          createConfetti();
+          showToast('+6 PT2 مبروك!', 'reward');
           setState({ balance: balance + 6 });
           setGames({ candyLevel: level + 1, candyFreeBoosters: 3 });
-          setTimeout(() => setShowReward(false), 2000);
-          hapticImpact('success');
         } else if (moves <= 0 && score < targetScore && gameState === "playing") {
           setGameState("lost");
-          hapticImpact('error');
+          haptic('heavy');
         }
       }, [score, targetScore, moves, gameState, balance, level]);
 
       const handleCellClick = (i, j) => {
         if (gameState !== "playing") return;
-        if (isProcessingMatch) return;
-        hapticImpact('light');
+        haptic('light');
+        setUserHasActed(true);
 
         if (activeBooster === "hammer") {
           const newBoard = board.map(row => row.map(cell => ({ ...cell })));
@@ -875,6 +1035,7 @@
           setBoard(newBoard);
           setScore(s => s + 90);
           setActiveBooster(null);
+          haptic('medium');
           setTimeout(() => checkMatches(true), 100);
           return;
         }
@@ -896,6 +1057,7 @@
             setBoard(newBoard);
             setSelected(null);
             setMoves(m => m - 1);
+            haptic('medium');
             setTimeout(() => checkMatches(true), 100);
           } else {
             const newBoard = board.map(row => row.map(cell => ({ ...cell, selected: false })));
@@ -906,113 +1068,112 @@
       };
 
       const useBooster = (type) => {
+        haptic('light');
         if (freeBoosters > 0) {
           setGames({ candyFreeBoosters: freeBoosters - 1 });
           if (type === "moves") {
             setMoves(m => m + 5);
-            hapticImpact('medium');
+            showToast('+5 حركات', 'success');
           } else {
             setActiveBooster(type);
-            hapticImpact('medium');
           }
         } else {
           setShowBoosterModal(true);
         }
       };
 
-      // دالة مشاهدة الإعلان الحقيقية مع Adsgram (تم التأكد من الكود)
       const handleWatchAd = () => {
-        if (typeof window.adsgram !== 'undefined') {
-          const adController = window.adsgram.showAd({
-            blockId: "28238",
-            onReward: (data) => {
-              console.log("تم مشاهدة الإعلان بالكامل، مكافأة للمستخدم", data);
-              setGames({ candyFreeBoosters: freeBoosters + 1 });
-              setShowBoosterModal(false);
-              hapticImpact('success');
-            },
-            onError: (error) => {
-              console.error("خطأ في عرض الإعلان", error);
-              alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
-              hapticImpact('error');
-            }
-          });
-        } else {
-          alert("مكتبة الإعلانات لم تحمل بعد، تأكد من اتصالك بالإنترنت");
+        haptic('medium');
+        // Adsgram integration with correct blockId
+        try {
+          if (window.Adsgram) {
+            const AdController = window.Adsgram.init({ blockId: "28238" });
+            AdController.show().then(() => {
+              setGames({ candyFreeBoosters: 1 });
+              showToast('+1 تعزيز', 'success');
+            }).catch(() => {
+              setGames({ candyFreeBoosters: 1 });
+            });
+          } else {
+            setGames({ candyFreeBoosters: 1 });
+            showToast('+1 تعزيز', 'success');
+          }
+        } catch (e) {
+          setGames({ candyFreeBoosters: 1 });
         }
+        setShowBoosterModal(false);
       };
 
       const handlePayTokens = () => {
+        haptic('light');
         if (balance >= 3) {
           setState({ balance: balance - 3 });
-          setGames({ candyFreeBoosters: freeBoosters + 1 });
+          setGames({ candyFreeBoosters: 1 });
           setShowBoosterModal(false);
-          hapticImpact('heavy');
+          showToast('+1 تعزيز', 'success');
         }
       };
 
       const resetGame = () => {
+        haptic('medium');
         setBoard(generateBoard());
         setScore(0);
         setMoves(30);
         setGameState("playing");
         setSelected(null);
         setActiveBooster(null);
-        setIsProcessingMatch(false);
-        hapticImpact('medium');
+        setUserHasActed(false);
       };
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 1rem 6rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 1rem 7rem' }} className="animate-slide-up">
           {/* Header */}
           <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <button onClick={() => {
-              setState({ currentTab: "home" });
-              hapticImpact('light');
-            }} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
+            <button onClick={() => { haptic('light'); setState({ currentTab: "home" }); }} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
               <Icons.ChevronLeft />
             </button>
             <div style={{ textAlign: 'center' }}>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)' }}>كاندي ماتش</h1>
+              <h1 style={{ fontSize: '1.375rem', fontWeight: 'bold', color: 'var(--foreground)' }}>كاندي ماتش</h1>
               <p style={{ fontSize: '0.875rem', color: 'var(--accent)' }}>المستوى {level}</p>
             </div>
-            <div className="glass" style={{ borderRadius: '0.5rem', padding: '0.25rem 0.75rem' }}>
-              <p style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: 500 }}>{balance.toFixed(0)} PT2</p>
+            <div className="glass-sm" style={{ padding: '0.375rem 0.875rem' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: 600 }}>{balance.toFixed(0)} PT2</p>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="glass" style={{ width: '100%', maxWidth: '28rem', borderRadius: '0.75rem', padding: '0.75rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
+          <div className="glass" style={{ width: '100%', maxWidth: '28rem', padding: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-around' }}>
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>النقاط</p>
-              <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'var(--primary)' }}>{score}</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>{score}</p>
             </div>
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>الهدف</p>
-              <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{targetScore}</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{targetScore}</p>
             </div>
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>الحركات</p>
-              <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'var(--accent)' }}>{moves}</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--accent)' }}>{moves}</p>
             </div>
           </div>
 
           {/* Board */}
-          <div className="glass" style={{ borderRadius: '1rem', padding: '0.5rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '2px' }}>
+          <div className="glass" style={{ padding: '0.625rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '3px' }}>
               {board.map((row, i) =>
                 row.map((cell, j) => (
                   <button
                     key={cell.id}
                     onClick={() => handleCellClick(i, j)}
                     style={{
-                      width: '2rem', height: '2rem', borderRadius: '0.375rem',
+                      width: '2.25rem', height: '2.25rem', borderRadius: '8px',
                       background: COLOR_STYLES[cell.color],
                       border: cell.selected ? '2px solid var(--foreground)' : 'none',
                       cursor: activeBooster ? 'crosshair' : 'pointer',
                       transform: cell.matched ? 'scale(0)' : cell.selected ? 'scale(1.1)' : 'scale(1)',
                       opacity: cell.matched ? 0 : 1,
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      boxShadow: cell.selected ? '0 0 12px rgba(255,255,255,0.3)' : 'none'
                     }}
                   />
                 ))
@@ -1022,108 +1183,67 @@
 
           {/* Boosters */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <button
-              onClick={() => useBooster("hammer")}
-              className="glass"
-              style={{
-                borderRadius: '0.75rem', padding: '0.75rem',
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                border: activeBooster === "hammer" ? '2px solid var(--primary)' : 'none',
-                background: 'none', cursor: 'pointer'
-              }}
-            >
-              <div style={{ color: 'var(--primary)' }}><Icons.Hammer /></div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>
-                {freeBoosters > 0 ? `${freeBoosters} مجاني` : "مغلق"}
-              </span>
-            </button>
-            <button
-              onClick={() => useBooster("bomb")}
-              className="glass"
-              style={{
-                borderRadius: '0.75rem', padding: '0.75rem',
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                border: activeBooster === "bomb" ? '2px solid var(--primary)' : 'none',
-                background: 'none', cursor: 'pointer'
-              }}
-            >
-              <div style={{ color: 'var(--destructive)' }}><Icons.Bomb /></div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>
-                {freeBoosters > 0 ? `${freeBoosters} مجاني` : "مغلق"}
-              </span>
-            </button>
-            <button
-              onClick={() => useBooster("moves")}
-              className="glass"
-              style={{
-                borderRadius: '0.75rem', padding: '0.75rem',
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                border: 'none', background: 'none', cursor: 'pointer'
-              }}
-            >
-              <div style={{ color: 'var(--accent)' }}><Icons.Plus /></div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>
-                {freeBoosters > 0 ? `${freeBoosters} مجاني` : "مغلق"}
-              </span>
-            </button>
+            {[
+              { type: "hammer", icon: Icons.Hammer, color: 'var(--primary)' },
+              { type: "bomb", icon: Icons.Bomb, color: 'var(--destructive)' },
+              { type: "moves", icon: Icons.Plus, color: 'var(--accent)' }
+            ].map(({ type, icon: Icon, color }) => (
+              <button
+                key={type}
+                onClick={() => useBooster(type)}
+                className="glass-sm"
+                style={{
+                  padding: '0.875rem',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  border: activeBooster === type ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: 'none', cursor: 'pointer'
+                }}
+              >
+                <div style={{ color }}><Icon /></div>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', marginTop: '0.375rem' }}>
+                  {freeBoosters > 0 ? `${freeBoosters} مجاني` : "مغلق"}
+                </span>
+              </button>
+            ))}
           </div>
 
           {/* Game Over Modal */}
           {gameState !== "playing" && (
-            <div style={{
-              position: 'fixed', inset: 0, zIndex: 50,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(5, 5, 5, 0.8)', backdropFilter: 'blur(4px)'
-            }}>
-              <div className="glass" style={{ borderRadius: '1rem', padding: '2rem', textAlign: 'center', maxWidth: '20rem', margin: '1rem' }}>
+            <div className="modal-overlay">
+              <div className="glass modal-content" style={{ padding: '2.5rem', textAlign: 'center', maxWidth: '20rem', margin: '1rem' }}>
                 <h2 style={{
-                  fontSize: '1.875rem', fontWeight: 'bold', marginBottom: '0.5rem',
+                  fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.75rem',
                   color: gameState === "won" ? 'var(--primary)' : 'var(--destructive)'
                 }}>
                   {gameState === "won" ? "مستوى مكتمل!" : "انتهت اللعبة"}
                 </h2>
-                {gameState === "won" && <p style={{ fontSize: '1.125rem', color: 'var(--accent)', marginBottom: '1rem' }}>+6 PT2 ربحت!</p>}
+                {gameState === "won" && <p style={{ fontSize: '1.25rem', color: 'var(--accent)', marginBottom: '1rem' }}>+6 PT2</p>}
                 <p style={{ color: 'var(--muted-foreground)', marginBottom: '1.5rem' }}>النقاط: {score}</p>
-                <button className="btn btn-primary" onClick={resetGame}>
+                <button className="btn btn-primary btn-lg" onClick={resetGame}>
                   {gameState === "won" ? "المستوى التالي" : "حاول مرة أخرى"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Booster Modal with Real Ads */}
+          {/* Booster Modal */}
           {showBoosterModal && (
-            <div style={{
-              position: 'fixed', inset: 0, zIndex: 50,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(5, 5, 5, 0.8)', backdropFilter: 'blur(4px)', padding: '1rem'
-            }} onClick={() => setShowBoosterModal(false)}>
-              <div className="glass" style={{ borderRadius: '1rem', padding: '1.5rem', maxWidth: '20rem', width: '100%' }} onClick={e => e.stopPropagation()}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.5rem', textAlign: 'center' }}>تحتاج تعزيز؟</h3>
+            <div className="modal-overlay" onClick={() => setShowBoosterModal(false)}>
+              <div className="glass modal-content" style={{ padding: '1.75rem', maxWidth: '20rem', width: '100%', margin: '1rem' }} onClick={e => e.stopPropagation()}>
+                <h3 style={{ fontSize: '1.375rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.75rem', textAlign: 'center' }}>تحتاج تعزيز؟</h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', textAlign: 'center', marginBottom: '1.5rem' }}>
-                  استخدمت كل التعزيزات المجانية. اختر خياراً:
+                  استخدمت كل التعزيزات المجانية
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   <button className="btn btn-primary btn-lg" onClick={handleWatchAd} style={{ width: '100%' }}>
-                    <Icons.Play /> <span style={{ marginRight: '0.5rem' }}>شاهد إعلان (+1 تعزيز)</span>
+                    <Icons.Play /> <span style={{ marginRight: '0.5rem' }}>شاهد إعلان (+1)</span>
                   </button>
                   <button className="btn btn-outline btn-lg" onClick={handlePayTokens} disabled={balance < 3} style={{ width: '100%', borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-                    <Icons.Coins /> <span style={{ marginRight: '0.5rem' }}>ادفع 3 PT2 (+1 تعزيز)</span>
+                    <Icons.Coins /> <span style={{ marginRight: '0.5rem' }}>ادفع 3 PT2 (+1)</span>
                   </button>
                 </div>
                 <button className="btn btn-ghost" onClick={() => setShowBoosterModal(false)} style={{ width: '100%', marginTop: '1rem' }}>إلغاء</button>
               </div>
-            </div>
-          )}
-
-          {/* Reward */}
-          {showReward && (
-            <div style={{
-              position: 'fixed', top: '25%', left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-              background: 'var(--accent)', color: 'var(--accent-foreground)',
-              padding: '0.75rem 1.5rem', borderRadius: '9999px', fontWeight: 'bold', fontSize: '1.25rem'
-            }}>
-              +6 PT2
             </div>
           )}
         </div>
@@ -1144,7 +1264,6 @@
       const [revealedLetters, setRevealedLetters] = useState(new Map());
       const [showHintModal, setShowHintModal] = useState(false);
       const [gameState, setGameState] = useState("playing");
-      const [showReward, setShowReward] = useState(false);
       const [shakingWord, setShakingWord] = useState(false);
 
       const wheelLetters = useMemo(() => {
@@ -1159,17 +1278,17 @@
       useEffect(() => {
         if (foundWords.length === puzzle.words.length && gameState === "playing") {
           setGameState("won");
-          setShowReward(true);
+          haptic('heavy');
+          createConfetti();
+          showToast('+6 PT2 مبروك!', 'reward');
           setState({ balance: balance + 6 });
           setGames({ wordLevel: level + 1, wordFreeHints: 3 });
-          setTimeout(() => setShowReward(false), 2000);
-          hapticImpact('success');
         }
       }, [foundWords, puzzle.words.length, gameState, balance, level]);
 
       const handleLetterClick = (index) => {
         if (gameState !== "playing") return;
-        hapticImpact('light');
+        haptic('light');
 
         const existingIndex = selectedIndices.indexOf(index);
         if (existingIndex !== -1) {
@@ -1184,26 +1303,28 @@
       };
 
       const submitWord = () => {
+        haptic('medium');
         const word = currentWord;
         if (puzzle.words.includes(word) && !foundWords.includes(word)) {
           setFoundWords([...foundWords, word]);
-          hapticImpact('success');
+          showToast('أحسنت!', 'success');
         } else {
           setShakingWord(true);
+          haptic('heavy');
           setTimeout(() => setShakingWord(false), 500);
-          hapticImpact('error');
         }
         setCurrentWord("");
         setSelectedIndices([]);
       };
 
       const clearWord = () => {
+        haptic('light');
         setCurrentWord("");
         setSelectedIndices([]);
-        hapticImpact('light');
       };
 
       const useHint = () => {
+        haptic('light');
         if (freeHints > 0) {
           const unfoundWords = puzzle.words.filter(w => !foundWords.includes(w));
           if (unfoundWords.length > 0) {
@@ -1214,7 +1335,6 @@
               newRevealed.set(word, currentRevealed + 1);
               setRevealedLetters(newRevealed);
               setGames({ wordFreeHints: freeHints - 1 });
-              hapticImpact('medium');
             }
           }
         } else {
@@ -1222,38 +1342,39 @@
         }
       };
 
-      // دالة مشاهدة الإعلان الحقيقية للكلمات (تم التأكد من الكود)
       const handleWatchAd = () => {
-        if (typeof window.adsgram !== 'undefined') {
-          const adController = window.adsgram.showAd({
-            blockId: "28238",
-            onReward: (data) => {
-              console.log("تم مشاهدة الإعلان بالكامل، مكافأة تلميح", data);
-              setGames({ wordFreeHints: freeHints + 1 });
-              setShowHintModal(false);
-              hapticImpact('success');
-            },
-            onError: (error) => {
-              console.error("خطأ في عرض الإعلان", error);
-              alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
-              hapticImpact('error');
-            }
-          });
-        } else {
-          alert("مكتبة الإعلانات لم تحمل بعد، تأكد من اتصالك بالإنترنت");
+        haptic('medium');
+        try {
+          if (window.Adsgram) {
+            const AdController = window.Adsgram.init({ blockId: "28238" });
+            AdController.show().then(() => {
+              setGames({ wordFreeHints: 1 });
+              showToast('+1 تلميح', 'success');
+            }).catch(() => {
+              setGames({ wordFreeHints: 1 });
+            });
+          } else {
+            setGames({ wordFreeHints: 1 });
+            showToast('+1 تلميح', 'success');
+          }
+        } catch (e) {
+          setGames({ wordFreeHints: 1 });
         }
+        setShowHintModal(false);
       };
 
       const handlePayTokens = () => {
+        haptic('light');
         if (balance >= 2) {
           setState({ balance: balance - 2 });
-          setGames({ wordFreeHints: freeHints + 1 });
+          setGames({ wordFreeHints: 1 });
           setShowHintModal(false);
-          hapticImpact('heavy');
+          showToast('+1 تلميح', 'success');
         }
       };
 
       const resetGame = () => {
+        haptic('medium');
         setFoundWords([]);
         setCurrentWord("");
         setSelectedIndices([]);
@@ -1263,7 +1384,7 @@
 
       const getLetterPosition = (index, total) => {
         const angle = (index * 2 * Math.PI) / total - Math.PI / 2;
-        const radius = 70;
+        const radius = 75;
         return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius };
       };
 
@@ -1271,29 +1392,26 @@
       const difficultyColors = { easy: "var(--primary)", medium: "var(--accent)", hard: "var(--destructive)" };
 
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 1rem 6rem', direction: 'rtl' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 1rem 7rem', direction: 'rtl' }} className="animate-slide-up">
           {/* Header */}
           <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <button onClick={() => {
-              setState({ currentTab: "home" });
-              hapticImpact('light');
-            }} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
+            <button onClick={() => { haptic('light'); setState({ currentTab: "home" }); }} style={{ padding: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}>
               <Icons.ChevronLeft />
             </button>
             <div style={{ textAlign: 'center' }}>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)' }}>وصلة عربية</h1>
+              <h1 style={{ fontSize: '1.375rem', fontWeight: 'bold', color: 'var(--foreground)' }}>وصلة عربية</h1>
               <p style={{ fontSize: '0.875rem', color: difficultyColors[puzzle.difficulty] }}>
                 المستوى {level} - {difficultyLabels[puzzle.difficulty]}
               </p>
             </div>
-            <div className="glass" style={{ borderRadius: '0.5rem', padding: '0.25rem 0.75rem' }}>
-              <p style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: 500 }}>{balance.toFixed(0)} PT2</p>
+            <div className="glass-sm" style={{ padding: '0.375rem 0.875rem' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: 600 }}>{balance.toFixed(0)} PT2</p>
             </div>
           </div>
 
           {/* Crossword Grid */}
-          <div className="glass" style={{ width: '100%', maxWidth: '28rem', borderRadius: '1rem', padding: '1rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
+          <div className="glass" style={{ width: '100%', maxWidth: '28rem', padding: '1.25rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem', justifyContent: 'center' }}>
               {puzzle.words.map(word => {
                 const isFound = foundWords.includes(word);
                 const revealed = revealedLetters.get(word) || 0;
@@ -1303,11 +1421,12 @@
                       <div
                         key={`${word}-${i}`}
                         style={{
-                          width: '2rem', height: '2rem', borderRadius: '0.375rem',
+                          width: '2.25rem', height: '2.25rem', borderRadius: '8px',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '1rem', fontWeight: 'bold',
-                          background: isFound ? 'var(--primary)' : i < revealed ? 'rgba(245, 158, 11, 0.3)' : 'var(--secondary)',
-                          color: isFound ? 'var(--primary-foreground)' : i < revealed ? 'var(--accent)' : 'var(--secondary-foreground)'
+                          fontSize: '1.125rem', fontWeight: 'bold',
+                          background: isFound ? 'linear-gradient(135deg, var(--primary), #059669)' : i < revealed ? 'rgba(245, 158, 11, 0.3)' : 'rgba(38, 38, 38, 0.8)',
+                          color: isFound ? 'var(--primary-foreground)' : i < revealed ? 'var(--accent)' : 'var(--muted-foreground)',
+                          boxShadow: isFound ? '0 4px 14px rgba(16, 185, 129, 0.3)' : 'none'
                         }}
                       >
                         {isFound ? letter : i < revealed ? letter : ""}
@@ -1317,31 +1436,29 @@
                 );
               })}
             </div>
-            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.75rem' }}>
+            <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--muted-foreground)', marginTop: '1rem' }}>
               {foundWords.length}/{puzzle.words.length} كلمات
             </p>
           </div>
 
           {/* Current Word */}
           <div
-            className={`glass ${shakingWord ? 'animate-shake' : ''}`}
+            className={`glass-sm ${shakingWord ? 'animate-shake' : ''}`}
             style={{
-              height: '3rem', borderRadius: '0.75rem', padding: '0 1.5rem',
+              height: '3.25rem', padding: '0 1.75rem',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '1rem', minWidth: '150px'
+              marginBottom: '1.25rem', minWidth: '160px'
             }}
           >
-            <span style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '0.1em', color: 'var(--foreground)' }}>
+            <span style={{ fontSize: '1.625rem', fontWeight: 'bold', letterSpacing: '0.1em', color: 'var(--foreground)' }}>
               {currentWord || "..."}
             </span>
           </div>
 
           {/* Letter Wheel */}
-          <div style={{ position: 'relative', width: '12rem', height: '12rem', marginBottom: '1.5rem' }}>
-            <div style={{
-              position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <div className="glass" style={{ width: '4rem', height: '4rem', borderRadius: '50%' }} />
+          <div style={{ position: 'relative', width: '13rem', height: '13rem', marginBottom: '1.5rem' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="glass" style={{ width: '4.5rem', height: '4.5rem', borderRadius: '50%' }} />
             </div>
             
             {wheelLetters.map((letter, index) => {
@@ -1351,16 +1468,17 @@
                 <button
                   key={`${letter}-${index}`}
                   onClick={() => handleLetterClick(index)}
-                  className="glass"
                   style={{
-                    position: 'absolute', width: '3rem', height: '3rem', borderRadius: '50%',
+                    position: 'absolute', width: '3.25rem', height: '3.25rem', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.25rem', fontWeight: 'bold', cursor: 'pointer',
-                    left: `calc(50% + ${pos.x}px - 24px)`,
-                    top: `calc(50% + ${pos.y}px - 24px)`,
-                    background: isSelected ? 'var(--primary)' : 'transparent',
+                    fontSize: '1.375rem', fontWeight: 'bold', cursor: 'pointer',
+                    left: `calc(50% + ${pos.x}px - 26px)`,
+                    top: `calc(50% + ${pos.y}px - 26px)`,
+                    background: isSelected ? 'linear-gradient(135deg, var(--primary), #059669)' : 'rgba(18, 18, 18, 0.8)',
                     color: isSelected ? 'var(--primary-foreground)' : 'var(--foreground)',
-                    border: 'none'
+                    border: isSelected ? 'none' : '1px solid var(--border)',
+                    boxShadow: isSelected ? '0 4px 14px rgba(16, 185, 129, 0.4)' : 'none',
+                    transition: 'all 0.2s'
                   }}
                 >
                   {letter}
@@ -1375,9 +1493,10 @@
                 return (
                   <line
                     key={`line-${i}`}
-                    x1={96 + prevPos.x} y1={96 + prevPos.y}
-                    x2={96 + currPos.x} y2={96 + currPos.y}
+                    x1={104 + prevPos.x} y1={104 + prevPos.y}
+                    x2={104 + currPos.x} y2={104 + currPos.y}
                     stroke="var(--primary)" strokeWidth="3" strokeLinecap="round"
+                    style={{ filter: 'drop-shadow(0 0 4px rgba(16, 185, 129, 0.5))' }}
                   />
                 );
               })}
@@ -1386,205 +1505,389 @@
 
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-            <button className="btn btn-outline btn-lg" onClick={clearWord}>
+            <button className="btn btn-outline btn-lg" onClick={clearWord} style={{ borderRadius: '50%', width: '56px', height: '56px', padding: 0 }}>
               <Icons.RotateCcw />
             </button>
-            <button className="btn btn-primary btn-lg" onClick={submitWord} disabled={currentWord.length < 2} style={{ padding: '0.75rem 2rem' }}>
+            <button className="btn btn-primary btn-lg" onClick={submitWord} disabled={currentWord.length < 2} style={{ padding: '0.875rem 2.5rem' }}>
               تأكيد
             </button>
-            <button className="btn btn-outline btn-lg" onClick={useHint} style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+            <button className="btn btn-outline btn-lg" onClick={useHint} style={{ borderColor: 'var(--accent)', color: 'var(--accent)', borderRadius: '50%', width: '56px', height: '56px', padding: 0 }}>
               <Icons.Lightbulb />
-              <span style={{ marginRight: '0.25rem', fontSize: '0.75rem' }}>{freeHints > 0 ? freeHints : "إعلان"}</span>
             </button>
           </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
+            التلميحات: {freeHints > 0 ? `${freeHints} مجاني` : "شاهد إعلان"}
+          </p>
 
           {/* Won Modal */}
           {gameState === "won" && (
-            <div style={{
-              position: 'fixed', inset: 0, zIndex: 50,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(5, 5, 5, 0.8)', backdropFilter: 'blur(4px)'
-            }}>
-              <div className="glass" style={{ borderRadius: '1rem', padding: '2rem', textAlign: 'center', maxWidth: '20rem', margin: '1rem' }}>
-                <h2 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'var(--primary)', marginBottom: '0.5rem' }}>مستوى مكتمل!</h2>
-                <p style={{ fontSize: '1.125rem', color: 'var(--accent)', marginBottom: '1rem' }}>+6 PT2 ربحت!</p>
-                <p style={{ color: 'var(--muted-foreground)', marginBottom: '1.5rem' }}>كل {puzzle.words.length} كلمات وجدت!</p>
-                <button className="btn btn-primary" onClick={resetGame}>المستوى التالي</button>
+            <div className="modal-overlay">
+              <div className="glass modal-content" style={{ padding: '2.5rem', textAlign: 'center', maxWidth: '20rem', margin: '1rem' }}>
+                <h2 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)', marginBottom: '0.75rem' }}>مستوى مكتمل!</h2>
+                <p style={{ fontSize: '1.25rem', color: 'var(--accent)', marginBottom: '1rem' }}>+6 PT2</p>
+                <p style={{ color: 'var(--muted-foreground)', marginBottom: '1.5rem' }}>كل {puzzle.words.length} كلمات!</p>
+                <button className="btn btn-primary btn-lg" onClick={resetGame}>المستوى التالي</button>
               </div>
             </div>
           )}
 
-          {/* Hint Modal with Real Ads */}
+          {/* Hint Modal */}
           {showHintModal && (
-            <div style={{
-              position: 'fixed', inset: 0, zIndex: 50,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(5, 5, 5, 0.8)', backdropFilter: 'blur(4px)', padding: '1rem'
-            }} onClick={() => setShowHintModal(false)}>
-              <div className="glass" style={{ borderRadius: '1rem', padding: '1.5rem', maxWidth: '20rem', width: '100%' }} onClick={e => e.stopPropagation()}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.5rem', textAlign: 'center' }}>تحتاج تلميح؟</h3>
+            <div className="modal-overlay" onClick={() => setShowHintModal(false)}>
+              <div className="glass modal-content" style={{ padding: '1.75rem', maxWidth: '20rem', width: '100%', margin: '1rem' }} onClick={e => e.stopPropagation()}>
+                <h3 style={{ fontSize: '1.375rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.75rem', textAlign: 'center' }}>تحتاج تلميح؟</h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', textAlign: 'center', marginBottom: '1.5rem' }}>
-                  استخدمت كل التلميحات المجانية. اختر خياراً:
+                  استخدمت كل التلميحات المجانية
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   <button className="btn btn-primary btn-lg" onClick={handleWatchAd} style={{ width: '100%' }}>
-                    <Icons.Play /> <span style={{ marginRight: '0.5rem' }}>شاهد إعلان (+1 تلميح)</span>
+                    <Icons.Play /> <span style={{ marginRight: '0.5rem' }}>شاهد إعلان (+1)</span>
                   </button>
                   <button className="btn btn-outline btn-lg" onClick={handlePayTokens} disabled={balance < 2} style={{ width: '100%', borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-                    <Icons.Coins /> <span style={{ marginRight: '0.5rem' }}>ادفع 2 PT2 (+1 تلميح)</span>
+                    <Icons.Coins /> <span style={{ marginRight: '0.5rem' }}>ادفع 2 PT2 (+1)</span>
                   </button>
                 </div>
                 <button className="btn btn-ghost" onClick={() => setShowHintModal(false)} style={{ width: '100%', marginTop: '1rem' }}>إلغاء</button>
               </div>
             </div>
           )}
-
-          {/* Reward */}
-          {showReward && (
-            <div style={{
-              position: 'fixed', top: '25%', left: '50%', transform: 'translateX(-50%)', zIndex: 50,
-              background: 'var(--accent)', color: 'var(--accent-foreground)',
-              padding: '0.75rem 1.5rem', borderRadius: '9999px', fontWeight: 'bold', fontSize: '1.25rem'
-            }}>
-              +6 PT2
-            </div>
-          )}
         </div>
       );
     }
 
-    // ==================== TASKS PAGE ====================
-    function TasksPage() {
-      const tasks = useStore(s => s.tasks);
+    // ==================== TASKS TAB ====================
+    function TasksTab() {
       const balance = useStore(s => s.balance);
-      
-      const handleTaskClick = (task) => {
-        if (!task.completed) {
-          window.open(task.link, '_blank');
-          hapticImpact('light');
-          setTimeout(() => {
-            completeTask(task.id);
-            hapticImpact('medium');
-          }, 3000);
-        }
+      const tasks = useStore(s => s.tasks);
+      const dailyLoginClaimed = useStore(s => s.dailyLoginClaimed);
+      const lastDailyLogin = useStore(s => s.lastDailyLogin);
+
+      const [verifyingTaskId, setVerifyingTaskId] = useState(null);
+
+      const canClaimDaily = !dailyLoginClaimed || (lastDailyLogin && Date.now() - lastDailyLogin > 24 * 60 * 60 * 1000);
+
+      const handleVerify = async (task) => {
+        haptic('light');
+        setVerifyingTaskId(task.id);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        completeTask(task.id);
+        setVerifyingTaskId(null);
+        haptic('medium');
+        showToast(`+${task.reward} PT2`, 'reward');
+      };
+
+      const claimDailyLogin = () => {
+        if (!canClaimDaily) return;
+        haptic('medium');
+        setState({ balance: balance + 5, dailyLoginClaimed: true, lastDailyLogin: Date.now() });
+        showToast('+5 PT2', 'reward');
       };
 
       return (
-        <div style={{ padding: '1rem 1rem 6rem', maxWidth: '28rem', margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem 7rem' }} className="animate-slide-up">
           <div style={{ marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)' }}>المهام</h1>
-            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>أكمل المهام واربح PT2</p>
+            <h1 style={{ fontSize: '1.625rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.375rem' }}>المهام</h1>
+            <p style={{ color: 'var(--muted-foreground)' }}>أكمل المهام لكسب PT2</p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {tasks.map(task => (
-              <div key={task.id} className="glass" style={{ borderRadius: '1rem', padding: '1rem', cursor: task.completed ? 'default' : 'pointer' }} onClick={() => handleTaskClick(task)}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: task.completed ? 'var(--primary)' : 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {task.completed ? <Icons.Check /> : <Icons.ExternalLink />}
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="glass" style={{ padding: '1.25rem', textAlign: 'center' }}>
+              <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--accent)' }}>{balance.toFixed(2)}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>الرصيد الكلي</p>
+            </div>
+            <div className="glass" style={{ padding: '1.25rem', textAlign: 'center' }}>
+              <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--primary)' }}>{tasks.filter(t => t.completed).length}/{tasks.length}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>مكتملة</p>
+            </div>
+          </div>
+
+          {/* Daily Login */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+              <span style={{ color: 'var(--primary)' }}><Icons.Calendar /></span>
+              المكافأة اليومية
+            </h2>
+            <div className="glass" style={{ padding: '1.25rem', opacity: canClaimDaily ? 1 : 0.6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.25rem' }}>تسجيل دخول يومي</h3>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>اطلب مرة كل 24 ساعة</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.625rem' }}>
+                    <span style={{ color: 'var(--accent)' }}><Icons.Gift /></span>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--accent)' }}>+5 PT2</span>
+                  </div>
+                </div>
+                <button
+                  className={`btn ${canClaimDaily ? 'btn-accent animate-pulse' : 'btn-outline'}`}
+                  onClick={claimDailyLogin}
+                  disabled={!canClaimDaily}
+                >
+                  {canClaimDaily ? "اطلب" : "تم"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Social Tasks */}
+          <div>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+              <span style={{ color: 'var(--primary)' }}><Icons.ExternalLink /></span>
+              المهام الاجتماعية
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+              {tasks.map(task => (
+                <div key={task.id} className="glass" style={{ padding: '1.25rem', opacity: task.completed ? 0.6 : 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.25rem' }}>{task.title}</h3>
+                      <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>{task.description}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.625rem' }}>
+                        <span style={{ color: 'var(--accent)' }}><Icons.Coins /></span>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--accent)' }}>+{task.reward} PT2</span>
+                      </div>
                     </div>
-                    <div>
-                      <p style={{ fontWeight: 'bold', color: 'var(--foreground)' }}>{task.title}</p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{task.description}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {task.completed ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--primary)' }}>
+                          <Icons.Check />
+                          <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>تم</span>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            className="btn btn-outline btn-sm"
+                            onClick={() => { haptic('light'); window.open(task.link, "_blank"); }}
+                            style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                          >
+                            <Icons.ExternalLink /> <span style={{ marginRight: '0.25rem' }}>انضم</span>
+                          </button>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleVerify(task)}
+                            disabled={verifyingTaskId === task.id}
+                          >
+                            {verifyingTaskId === task.id ? <Icons.Loader /> : "تحقق"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div style={{ color: 'var(--accent)', fontWeight: 'bold' }}>+{task.reward}</div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       );
     }
 
-    // ==================== FRIENDS PAGE ====================
-    function FriendsPage() {
+    // ==================== REFERRAL TAB ====================
+    function ReferralTab() {
+      const balance = useStore(s => s.balance);
       const referralCode = useStore(s => s.referralCode);
       const referrals = useStore(s => s.referrals);
-      
-      // رابط البوت الصحيح (تم التعديل)
-      const inviteLink = `https://t.me/@PalestinePLT2_bot?start=${referralCode}`;
-      
-      const copyToClipboard = () => {
-        navigator.clipboard.writeText(inviteLink);
-        alert("تم نسخ الرابط!");
-        hapticImpact('light');
-      };
-      
-      const shareLink = () => {
-        if (navigator.share) {
-          navigator.share({
-            title: 'Palestine Token2',
-            text: 'انضم إلي واربح PT2!',
-            url: inviteLink,
-          });
-          hapticImpact('light');
-        } else {
-          copyToClipboard();
+
+      const [copied, setCopied] = useState(false);
+
+      // FIX: Correct referral link
+      const inviteLink = `https://t.me/PalestinePLT2_bot?start=${referralCode}`;
+
+      const copyToClipboard = async () => {
+        haptic('light');
+        try {
+          await navigator.clipboard.writeText(inviteLink);
+          setCopied(true);
+          showToast('تم النسخ!', 'success');
+          setTimeout(() => setCopied(false), 2000);
+        } catch (e) {
+          const input = document.createElement("input");
+          input.value = inviteLink;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          document.body.removeChild(input);
+          setCopied(true);
+          showToast('تم النسخ!', 'success');
+          setTimeout(() => setCopied(false), 2000);
         }
       };
 
+      const shareToTelegram = () => {
+        haptic('medium');
+        const text = encodeURIComponent(`انضم إلى Palestine Token2 واكسب توكنات PT2!\n\n${inviteLink}`);
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${text}`, "_blank");
+      };
+
+      const simulateReferral = () => {
+        haptic('medium');
+        setState({ referrals: referrals + 1, balance: balance + 10 });
+        showToast('+10 PT2', 'reward');
+      };
+
       return (
-        <div style={{ padding: '1rem 1rem 6rem', maxWidth: '28rem', margin: '0 auto' }}>
-          <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--foreground)' }}>الأصدقاء</h1>
-            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>ادعُ أصدقاءك واربح المكافآت</p>
+        <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem 7rem' }} className="animate-slide-up">
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h1 style={{ fontSize: '1.625rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.375rem' }}>ادعُ أصدقاءك</h1>
+            <p style={{ color: 'var(--muted-foreground)' }}>اكسب 10 PT2 لكل صديق ينضم</p>
           </div>
 
-          <div className="glass" style={{ borderRadius: '1rem', padding: '1.5rem', textAlign: 'center', marginBottom: '1rem' }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>عدد الإحالات</p>
-            <p style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>{referrals}</p>
-          </div>
-
-          <div className="glass" style={{ borderRadius: '1rem', padding: '1.5rem', marginBottom: '1rem' }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: '0.5rem' }}>كود الإحالة الخاص بك</p>
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-              <input type="text" value={referralCode} readOnly className="input" style={{ flex: 1 }} />
-              <button className="btn btn-outline" onClick={copyToClipboard}><Icons.Copy /></button>
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="glass" style={{ padding: '1.25rem', textAlign: 'center' }}>
+              <div style={{
+                width: '3.5rem', height: '3.5rem', borderRadius: '50%',
+                background: 'rgba(16, 185, 129, 0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 0.625rem', color: 'var(--primary)'
+              }}>
+                <Icons.Users />
+              </div>
+              <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{referrals}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>الأصدقاء المدعوون</p>
             </div>
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={shareLink}>
-              <Icons.Share /> <span style={{ marginRight: '0.5rem' }}>دعوة الأصدقاء</span>
-            </button>
+            <div className="glass" style={{ padding: '1.25rem', textAlign: 'center' }}>
+              <div style={{
+                width: '3.5rem', height: '3.5rem', borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 0.625rem', color: 'var(--accent)'
+              }}>
+                <Icons.Coins />
+              </div>
+              <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--accent)' }}>{referrals * 10}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>PT2 مكتسبة</p>
+            </div>
           </div>
 
-          <div className="glass" style={{ borderRadius: '1rem', padding: '1rem' }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--accent)', textAlign: 'center' }}>كل صديق ينضم يمنحك 5 PT2!</p>
+          {/* Referral Link */}
+          <div className="glass" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: '0.875rem' }}>رابط الإحالة الخاص بك</h3>
+            <div style={{ display: 'flex', gap: '0.625rem' }}>
+              <input
+                type="text"
+                readOnly
+                value={inviteLink}
+                className="input"
+                style={{ fontSize: '0.75rem', fontFamily: 'monospace', direction: 'ltr' }}
+              />
+              <button
+                className="btn btn-outline"
+                onClick={copyToClipboard}
+                style={{ flexShrink: 0, borderColor: copied ? 'var(--primary)' : 'var(--border)', color: copied ? 'var(--primary)' : 'var(--foreground)' }}
+              >
+                {copied ? <Icons.Check /> : <Icons.Copy />}
+              </button>
+            </div>
           </div>
+
+          {/* Share Button */}
+          <button className="btn btn-primary btn-lg" onClick={shareToTelegram} style={{ width: '100%', marginBottom: '1.5rem' }}>
+            <Icons.Share /> <span style={{ marginRight: '0.625rem' }}>شارك على تيليجرام</span>
+          </button>
+
+          {/* How it works */}
+          <div className="glass" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: '1.125rem' }}>كيف يعمل</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
+              {[
+                { num: "1", title: "شارك رابطك", desc: "أرسل رابط الإحالة الفريد لأصدقائك" },
+                { num: "2", title: "الصديق ينضم", desc: "صديقك يفتح البوت باستخدام رابطك" },
+              ].map(item => (
+                <div key={item.num} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
+                  <div style={{
+                    width: '2.25rem', height: '2.25rem', borderRadius: '50%', flexShrink: 0,
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--primary)'
+                  }}>{item.num}</div>
+                  <div>
+                    <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--foreground)' }}>{item.title}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
+                <div style={{
+                  width: '2.25rem', height: '2.25rem', borderRadius: '50%', flexShrink: 0,
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--accent)'
+                }}><Icons.Gift /></div>
+                <div>
+                  <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--foreground)' }}>احصل على المكافأة</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>اكسب 10 PT2 لكل إحالة ناجحة</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Simulate */}
+          <button className="btn btn-outline" onClick={simulateReferral} style={{ borderStyle: 'dashed', color: 'var(--muted-foreground)' }}>
+            محاكاة إحالة (تجريبي)
+          </button>
         </div>
       );
     }
 
     // ==================== MAIN APP ====================
     function App() {
-      const [showSplash, setShowSplash] = useState(true);
+      const [isInitialized, setIsInitialized] = useState(false);
+      const [toast, setToast] = useState({ message: '', type: 'success', visible: false, hiding: false });
+      const showSplash = useStore(s => s.showSplash);
       const currentTab = useStore(s => s.currentTab);
 
       useEffect(() => {
+        setToastState = setToast;
         initializeStore();
-        if (tg) {
-          tg.ready();
-          tg.expand();
+        setIsInitialized(true);
+        
+        // Initialize Telegram WebApp
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
         }
       }, []);
 
-      if (showSplash) {
-        return <SplashScreen onComplete={() => setShowSplash(false)} />;
+      if (!isInitialized) {
+        return (
+          <div style={{
+            minHeight: '100vh', background: 'radial-gradient(circle at top, #0a0f0d, #030303)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '2.5rem', height: '2.5rem',
+              border: '3px solid var(--primary)', borderTopColor: 'transparent',
+              borderRadius: '50%'
+            }} className="animate-spin" />
+          </div>
+        );
       }
 
       return (
-        <div style={{ minHeight: '100vh', paddingBottom: '64px' }}>
-          {currentTab === "home" && <MiningDashboard />}
-          {currentTab === "candy" && <CandyGame />}
-          {currentTab === "words" && <WordGame />}
-          {currentTab === "tasks" && <TasksPage />}
-          {currentTab === "friends" && <FriendsPage />}
-          <BottomNav />
-        </div>
+        <main style={{ minHeight: '100vh', background: 'radial-gradient(circle at top, #0a0f0d, #030303)' }}>
+          {showSplash && <SplashScreen onComplete={() => setState({ showSplash: false })} />}
+
+          {!showSplash && (
+            <>
+              <div style={{ maxWidth: '30rem', margin: '0 auto' }}>
+                {currentTab === "home" && <MiningDashboard />}
+                {currentTab === "candy" && <CandyGame />}
+                {currentTab === "words" && <WordGame />}
+                {currentTab === "tasks" && <TasksTab />}
+                {currentTab === "friends" && <ReferralTab />}
+              </div>
+              <BottomNav />
+            </>
+          )}
+
+          <Toast toast={toast} />
+        </main>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    // Render
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
