@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Palestine Token2 (PT2)</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- مكتبة إعلانات Adsgram الرسمية (تمت إضافتها) -->
+  <script src="https://cdn.adsgram.ai/js/adsgram.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ... (جميع التعريفات والتصميمات الموجودة كما هي دون أي تغيير) ... */
     * {
       margin: 0;
       padding: 0;
@@ -994,6 +997,7 @@
         }
       }, [board, userHasActed]);
 
+      // التحقق من الفوز أو الخسارة فقط (تم حذف useEffect الذي كان يستدعي checkMatches تلقائياً)
       useEffect(() => {
         if (score >= targetScore && gameState === "playing") {
           setGameState("won");
@@ -1082,26 +1086,26 @@
         }
       };
 
+      // تم تعديل دالة الإعلان لتعمل بشكل صحيح مع Adsgram
       const handleWatchAd = () => {
         haptic('medium');
-        // Adsgram integration with correct blockId
-        try {
-          if (window.Adsgram) {
-            const AdController = window.Adsgram.init({ blockId: "28238" });
-            AdController.show().then(() => {
-              setGames({ candyFreeBoosters: 1 });
+        if (typeof window.adsgram !== 'undefined') {
+          const adController = window.adsgram.showAd({
+            blockId: "28238",
+            onReward: (data) => {
+              console.log("تم مشاهدة الإعلان بالكامل، مكافأة للمستخدم", data);
+              setGames({ candyFreeBoosters: freeBoosters + 1 });
+              setShowBoosterModal(false);
               showToast('+1 تعزيز', 'success');
-            }).catch(() => {
-              setGames({ candyFreeBoosters: 1 });
-            });
-          } else {
-            setGames({ candyFreeBoosters: 1 });
-            showToast('+1 تعزيز', 'success');
-          }
-        } catch (e) {
-          setGames({ candyFreeBoosters: 1 });
+            },
+            onError: (error) => {
+              console.error("خطأ في عرض الإعلان", error);
+              alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
+            }
+          });
+        } else {
+          alert("مكتبة الإعلانات لم تحمل بعد، تأكد من اتصالك بالإنترنت");
         }
-        setShowBoosterModal(false);
       };
 
       const handlePayTokens = () => {
@@ -1342,25 +1346,26 @@
         }
       };
 
+      // تم تعديل دالة الإعلان لتعمل بشكل صحيح مع Adsgram
       const handleWatchAd = () => {
         haptic('medium');
-        try {
-          if (window.Adsgram) {
-            const AdController = window.Adsgram.init({ blockId: "28238" });
-            AdController.show().then(() => {
-              setGames({ wordFreeHints: 1 });
+        if (typeof window.adsgram !== 'undefined') {
+          const adController = window.adsgram.showAd({
+            blockId: "28238",
+            onReward: (data) => {
+              console.log("تم مشاهدة الإعلان بالكامل، مكافأة تلميح", data);
+              setGames({ wordFreeHints: freeHints + 1 });
+              setShowHintModal(false);
               showToast('+1 تلميح', 'success');
-            }).catch(() => {
-              setGames({ wordFreeHints: 1 });
-            });
-          } else {
-            setGames({ wordFreeHints: 1 });
-            showToast('+1 تلميح', 'success');
-          }
-        } catch (e) {
-          setGames({ wordFreeHints: 1 });
+            },
+            onError: (error) => {
+              console.error("خطأ في عرض الإعلان", error);
+              alert("حدث خطأ في الإعلان، حاول مرة أخرى لاحقًا");
+            }
+          });
+        } else {
+          alert("مكتبة الإعلانات لم تحمل بعد، تأكد من اتصالك بالإنترنت");
         }
-        setShowHintModal(false);
       };
 
       const handlePayTokens = () => {
